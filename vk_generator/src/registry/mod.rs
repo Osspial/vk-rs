@@ -12,54 +12,54 @@ fn null_str() -> *const str {
     unsafe{ mem::transmute([0usize; 2] ) }
 }
 
-/// A struct representation of the Vulkan XML registry. 
-/// 
+/// A struct representation of the Vulkan XML registry.
+///
 /// # Generation
 /// Binding generation is accomplished via the provided `gen_global()` and `gen_struct()` functions. The
 /// generation itself is a multi-step process, which proceeds roughly as follows:
 ///
 /// 1. Load everything defined in the Vulkan registry
 /// 2. Determine which functions and types are included in requested version and extensions
-/// 3. Preprocess loaded types and transform their identifiers in a way specified by the 
+/// 3. Preprocess loaded types and transform their identifiers in a way specified by the
 ///    [`GenConfig`] struct
 /// 4. Generate type bindings with any zero-cost wrappers specified by [`GenConfig`]
 /// 5. Generate function bindings
 ///
 /// Because steps 1 through 4 are entirely identical between the two generation functions only the
 /// specifics of step 5 are covered here.
-/// 
+///
 /// # Global Generation
-/// Global bindings are used similarly to any standard global function; once the function pointers 
-/// are loaded they can be called with `vk::{function_name}(...)`. However, in order to load the commands 
-/// one must first call the provided `vk::load_with(FnMut(&str) -> *const ())` function. This has a 
-/// closure as an argument, which must take a string slice and return a function pointer that either 
-/// corresponds to the provided function or is `null` if said function could not be found. Now, it is 
-/// expected that there will be unfound functions due to the very nature of how Vulkan loads functions: 
-/// getting an initial, command-loading function and then generating function pointers from that. Because 
+/// Global bindings are used similarly to any standard global function; once the function pointers
+/// are loaded they can be called with `vk::{function_name}(...)`. However, in order to load the commands
+/// one must first call the provided `vk::load_with(FnMut(&str) -> *const ())` function. This has a
+/// closure as an argument, which must take a string slice and return a function pointer that either
+/// corresponds to the provided function or is `null` if said function could not be found. Now, it is
+/// expected that there will be unfound functions due to the very nature of how Vulkan loads functions:
+/// getting an initial, command-loading function and then generating function pointers from that. Because
 /// of this, `load_with()` also serves to report any functions that *haven't* been loaded, returning a
 /// `Result<(), Vec<&str>>` with `Err` being returned if not all functions have been loaded and
-/// containing a list of all unloaded functions. `Some` is returned if all commands have been 
-/// loaded. In any case, `load_with()` can be called again in order to attempt to re-load any 
+/// containing a list of all unloaded functions. `Some` is returned if all commands have been
+/// loaded. In any case, `load_with()` can be called again in order to attempt to re-load any
 /// unloaded functions.
-/// 
+///
 /// ```
 /// mod vk {
 ///     // include!{concat!(env!("OUT_DIR"), "vk.rs")}
 ///   # pub fn load_with<F: FnMut(&str) -> *const ()>(mut load_fn: F) -> ::std::result::Result<(), Vec<&'static str>> {Ok(())}
 /// }
 /// # fn vk_function_loader_example(string: &str) -> *const () {::std::ptr::null()}
-/// 
+///
 /// fn main() {
 ///     vk::load_with(|s| vk_function_loader_example(s)).ok();
 /// }
 /// ```
-/// 
+///
 /// # Struct Generation
 /// The struct binding generator generates bindings that are methods of a `Vk` struct and don't
 /// load into a global state. Creating the `Vk` struct is done with the `Vk::new()` function; however,
 /// unlike the global function this does not load the functions. Instead they must be loaded with the
 /// `vk.load_with(FnMut(&str) -> *const ())` function, as shown:
-/// 
+///
 /// ```
 /// # mod vk {
 /// #     pub struct Vk {}
@@ -71,14 +71,14 @@ fn null_str() -> *const str {
 /// # fn vk_function_loader_example(string: &str) -> *const () {::std::ptr::null()}
 /// fn main() {
 ///     let mut vk = vk::Vk::new();
-///     
+///
 ///     vk.load_with(|s| vk_function_loader_example(s)).ok();
-///     
+///
 ///     // Remove mutability from `vk`
 ///     let vk = vk;
 /// }
 /// ```
-/// 
+///
 /// Like the global generator, `vk.load_with()` returns a result containing either nothing or a list
 /// of all unloaded functions. Successive calls to `load_with()` reload any functions that the
 /// loading function returns a non-`null` pointer to.
@@ -96,7 +96,7 @@ pub struct VkRegistry<'a> {
 impl<'a> VkRegistry<'a> {
     /// Create a new registry based off of the supplied xml file. Said xml should be sourced from the
     /// [`vk_api`] crate, and can be based off of any version of the API.
-    /// 
+    ///
     /// [`vk_api`]: ../../vk_api/index.html
     pub fn new(vk_xml: &[u8]) -> VkRegistry<'a> {
         let mut registry = VkRegistry {
@@ -119,10 +119,10 @@ impl<'a> VkRegistry<'a> {
 
         match vk_type {
             VkType::Unhandled     => Err(()),
-            vk_type               => unsafe{ 
+            vk_type               => unsafe{
                 let name = vk_type.name().unwrap();
                 if "API Constants" != &*name {
-                    self.types.insert(&*vk_type.name().unwrap(), vk_type); 
+                    self.types.insert(&*vk_type.name().unwrap(), vk_type);
                     Ok(())
                 } else {Err(())}
             }
@@ -159,7 +159,7 @@ impl<'a> VkRegistry<'a> {
         use std::{slice, str};
 
         let prepushcap = self.string_buffer.capacity();
-        // We want to have all of the string in one block of memory in order to save heap allocation time. 
+        // We want to have all of the string in one block of memory in order to save heap allocation time.
         self.string_buffer.push_str(string);
 
         if prepushcap != self.string_buffer.capacity() {
@@ -247,7 +247,7 @@ impl VkElType {
             Var(ref mut s)               |
             Const(ref mut s)             |
             ConstPtr(ref mut s, _)       |
-            MutPtr(ref mut s, _)         | 
+            MutPtr(ref mut s, _)         |
             ConstArray(ref mut s, _)     |
             ConstArrayEnum(ref mut s, _) |
             MutArray(ref mut s, _)       |
@@ -337,7 +337,7 @@ impl VkElType {
             Unknown             => *self = Void
         }
     }
-    
+
     fn empty_const() -> VkElType {
         VkElType::Const(null_str())
     }
@@ -397,7 +397,7 @@ impl fmt::Debug for VkMember {
 }
 
 impl VkMember {
-    fn empty(optional: bool) -> VkMember {
+    fn empty(optional: bool) -> Self {
         VkMember {
             field_type: VkElType::Unknown,
             field_name: null_str(),
@@ -447,14 +447,14 @@ impl fmt::Debug for VkVariant {
 }
 
 impl VkVariant {
-    fn new_value(name: *const str, value: isize) -> VkVariant {
+    fn new_value(name: *const str, value: isize) -> Self {
         VkVariant::Value {
             name: name,
             value: value
         }
     }
 
-    fn new_bitpos(name: *const str, bitpos: u32) -> VkVariant {
+    fn new_bitpos(name: *const str, bitpos: u32) -> Self {
         VkVariant::Bitpos {
             name: name,
             bitpos: bitpos
@@ -573,42 +573,42 @@ impl VkType {
         }
     }
 
-    pub fn new_struct(name: *const str) -> VkType {
+    pub fn new_struct(name: *const str) -> Self {
         VkType::Struct {
             name: name,
             fields: Vec::with_capacity(8)
         }
     }
 
-    pub fn new_union(name: *const str) -> VkType {
+    pub fn new_union(name: *const str) -> Self {
         VkType::Union {
             name: name,
             variants: Vec::with_capacity(8)
         }
     }
 
-    pub fn new_enum(name: *const str) -> VkType {
+    pub fn new_enum(name: *const str) -> Self {
         VkType::Enum {
             name: name,
             variants: Vec::with_capacity(8)
         }
     }
 
-    pub fn new_bitmask(name: *const str) -> VkType {
+    pub fn new_bitmask(name: *const str) -> Self {
         VkType::Bitmask {
             name: name,
             variants: Vec::with_capacity(8)
         }
     }
 
-    pub fn empty_handle() -> VkType {
+    pub fn empty_handle() -> Self {
         VkType::Handle {
             name: null_str(),
             dispatchable: true
         }
     }
 
-    pub fn new_typedef(requires: Option<*const str>) -> VkType {
+    pub fn new_typedef(requires: Option<*const str>) -> Self {
         VkType::TypeDef {
             typ: null_str(),
             name: null_str(),
@@ -616,26 +616,26 @@ impl VkType {
         }
     }
 
-    pub fn new_const(name: *const str, value: *const str) -> VkType {
+    pub fn new_const(name: *const str, value: *const str) -> Self {
         VkType::ApiConst {
             name: name,
             value: value
         }
     }
 
-    pub fn new_define(name: *const str) -> VkType {
+    pub fn new_define(name: *const str) -> Self {
         VkType::Define  {
             name: name
         }
     }
 
-    pub fn empty_define() -> VkType {
+    pub fn empty_define() -> Self {
         VkType::Define {
             name: null_str()
         }
     }
 
-    pub fn empty_funcpointer() -> VkType {
+    pub fn empty_funcpointer() -> Self {
         VkType::FuncPointer {
             name: null_str(),
             ret: VkElType::Unknown,
@@ -643,7 +643,7 @@ impl VkType {
         }
     }
 
-    pub fn new_extern(name: *const str, requires: *const str) -> VkType {
+    pub fn new_extern(name: *const str, requires: *const str) -> Self {
         VkType::ExternType {
             name: name,
             requires: requires
@@ -707,7 +707,7 @@ impl VkParam {
 pub struct VkVersion(pub u16, pub u16);
 
 impl VkVersion {
-    fn from_str(num: &str) -> VkVersion {
+    fn from_str(num: &str) -> Self {
         use std::u16;
 
         let mut ver = [0; 2];
@@ -727,7 +727,7 @@ pub struct VkFeature {
 }
 
 impl VkFeature {
-    fn new(name: *const str, version: VkVersion) -> VkFeature {
+    fn new(name: *const str, version: VkVersion) -> Self {
         VkFeature {
             name: name,
             version: version,
@@ -818,14 +818,14 @@ impl fmt::Debug for VkInterface {
                           .field("profile", &to_option(profile))
                           .finish(),
             ExtnEnum{extends,
-                     profile, 
+                     profile,
                      ref variant}  =>
                 fmt_struct.field("extends", &to_option(extends))
                           .field("profile", &to_option(profile))
                           .field("variant", &*variant)
                           .finish(),
-            ConstDef{name, 
-                     value, 
+            ConstDef{name,
+                     value,
                      profile}      =>
                 fmt_struct.field("name", &to_option(name))
                           .field("value", &to_option(value))
@@ -837,21 +837,21 @@ impl fmt::Debug for VkInterface {
 }
 
 impl VkInterface {
-    fn new_command(name: *const str, profile: Option<*const str>) -> VkInterface {
+    fn new_command(name: *const str, profile: Option<*const str>) -> Self {
         VkInterface::Command {
             name: name,
             profile: profile.unwrap_or(null_str())
         }
     }
 
-    fn new_type(name: *const str, profile: Option<*const str>) -> VkInterface {
+    fn new_type(name: *const str, profile: Option<*const str>) -> Self {
         VkInterface::Type {
             name: name,
             profile: profile.unwrap_or(null_str())
         }
     }
 
-    fn new_const_def(name: *const str, value: *const str, profile: Option<*const str>) -> VkInterface {
+    fn new_const_def(name: *const str, value: *const str, profile: Option<*const str>) -> Self {
         VkInterface::ConstDef {
             name: name,
             value: value,
@@ -859,14 +859,14 @@ impl VkInterface {
         }
     }
 
-    fn new_api_const(name: *const str, profile: Option<*const str>) -> VkInterface {
+    fn new_api_const(name: *const str, profile: Option<*const str>) -> Self {
         VkInterface::ApiConst {
             name: name,
             profile: profile.unwrap_or(null_str())
         }
     }
 
-    fn new_extn_enum(variant: VkVariant, extends: Option<*const str>, profile: Option<*const str>) -> VkInterface {
+    fn new_extn_enum(variant: VkVariant, extends: Option<*const str>, profile: Option<*const str>) -> Self {
         VkInterface::ExtnEnum {
             extends: extends.unwrap_or(null_str()),
             profile: profile.unwrap_or(null_str()),
@@ -890,7 +890,7 @@ pub struct VkExtn {
 }
 
 impl VkExtn {
-    fn new(name: *const str, num: isize) -> VkExtn {
+    fn new(name: *const str, num: isize) -> Self {
         VkExtn {
             name: name,
             num: num,

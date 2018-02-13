@@ -20,6 +20,7 @@ pub struct GenConfig<'a> {
     pub camel_case_variants: bool,
     pub snake_case_members: bool,
     pub debug_c_strings: bool,
+    pub use_native_enums: bool,
     pub use_native_unions: bool,
 
     pub wrap_bitmasks: bool,
@@ -29,17 +30,17 @@ pub struct GenConfig<'a> {
 
 impl<'a> GenConfig<'a> {
     /// Create a new generator config. Is identical to `Default::default()`.
-    pub fn new() -> GenConfig<'a> {
+    pub fn new() -> Self {
         Default::default()
     }
 
-    /// Whether or not to remove the `Vk` prefix on structs, enums, and typedefs.
+    /// Whether or not to remove the `Vk` prefix on structs, enums, consts, and typedefs.
     ///
     /// As an example, take the struct `VkInstanceCreateInfo`. If this is set to `true`, the generator
     /// will turn that into `InstanceCreateInfo`.
     ///
     /// Defaults to `false`.
-    pub fn remove_type_prefix(mut self, remove_type_prefix: bool) -> GenConfig<'a> {
+    pub fn remove_type_prefix(mut self, remove_type_prefix: bool) -> Self {
         self.remove_type_prefix = remove_type_prefix;
         self
     }
@@ -50,7 +51,7 @@ impl<'a> GenConfig<'a> {
     /// may cause.
     ///
     /// Defaults to `true`.
-    pub fn remove_vk_result_prefix(mut self, remove_vk_result_prefix: bool) -> GenConfig<'a> {
+    pub fn remove_vk_result_prefix(mut self, remove_vk_result_prefix: bool) -> Self {
         self.remove_vk_result_prefix = remove_vk_result_prefix;
         self
     }
@@ -61,7 +62,7 @@ impl<'a> GenConfig<'a> {
     /// that into `createInstance`.
     ///
     /// Defaults to `true`.
-    pub fn remove_command_prefix(mut self, remove_command_prefix: bool) -> GenConfig<'a> {
+    pub fn remove_command_prefix(mut self, remove_command_prefix: bool) -> Self {
         self.remove_command_prefix = remove_command_prefix;
         self
     }
@@ -74,7 +75,7 @@ impl<'a> GenConfig<'a> {
     /// variant does not have a suffix this will only remove the prefix.
     ///
     /// Defaults to `true`.
-    pub fn remove_variant_padding(mut self, remove_variant_padding: bool) -> GenConfig<'a> {
+    pub fn remove_variant_padding(mut self, remove_variant_padding: bool) -> Self {
         self.remove_variant_padding = remove_variant_padding;
         self
     }
@@ -86,7 +87,7 @@ impl<'a> GenConfig<'a> {
     /// `QUEUE_GRAPHICS_BIT`.
     ///
     /// Defaults to `true`.
-    pub fn remove_bitmask_prefix(mut self, remove_bitmask_prefix: bool) -> GenConfig<'a> {
+    pub fn remove_bitmask_prefix(mut self, remove_bitmask_prefix: bool) -> Self {
         self.remove_bitmask_prefix = remove_bitmask_prefix;
         self
     }
@@ -99,7 +100,7 @@ impl<'a> GenConfig<'a> {
     /// native Rust code.
     ///
     /// Defaults to `true`.
-    pub fn snake_case_commands(mut self, snake_case_commands: bool) -> GenConfig<'a> {
+    pub fn snake_case_commands(mut self, snake_case_commands: bool) -> Self {
         self.snake_case_commands = snake_case_commands;
         self
     }
@@ -110,7 +111,7 @@ impl<'a> GenConfig<'a> {
     /// this to `true` would result in the variant being turned into `VkStructureTypeApplicationInfo`.
     ///
     /// Defaults to `true`.
-    pub fn camel_case_variants(mut self, camel_case_variants: bool) -> GenConfig<'a> {
+    pub fn camel_case_variants(mut self, camel_case_variants: bool) -> Self {
         self.camel_case_variants = camel_case_variants;
         self
     }
@@ -121,7 +122,7 @@ impl<'a> GenConfig<'a> {
     /// this to `true` would result in the field being turned into `application_version`.
     ///
     /// Defaults to `true`.
-    pub fn snake_case_members(mut self, snake_case_members: bool) -> GenConfig<'a> {
+    pub fn snake_case_members(mut self, snake_case_members: bool) -> Self {
         self.snake_case_members = snake_case_members;
         self
     }
@@ -130,8 +131,16 @@ impl<'a> GenConfig<'a> {
     /// of bytes or as a string.
     ///
     /// Defaults to `true`.
-    pub fn debug_c_strings(mut self, debug_c_strings: bool) -> GenConfig<'a> {
+    pub fn debug_c_strings(mut self, debug_c_strings: bool) -> Self {
         self.debug_c_strings = debug_c_strings;
+        self
+    }
+
+    /// Whether or not to use the `enum` keyword to create native tagged unions.
+    ///
+    /// Defaults to `true`.
+    pub fn use_native_enums(mut self, use_native_enums: bool) -> Self {
+        self.use_native_enums = use_native_enums;
         self
     }
 
@@ -139,7 +148,7 @@ impl<'a> GenConfig<'a> {
     /// Currently relies on the `untagged_unions` feature.
     ///
     /// Defaults to `false`.
-    pub fn use_native_unions(mut self, use_native_unions: bool) -> GenConfig<'a> {
+    pub fn use_native_unions(mut self, use_native_unions: bool) -> Self {
         self.use_native_unions = use_native_unions;
         self
     }
@@ -148,7 +157,7 @@ impl<'a> GenConfig<'a> {
     /// [bitflags](https://doc.rust-lang.org/bitflags/bitflags/macro.bitflags!.html) crate.
     ///
     /// Defaults to `true`.
-    pub fn wrap_bitmasks(mut self, wrap_bitmasks: bool) -> GenConfig<'a> {
+    pub fn wrap_bitmasks(mut self, wrap_bitmasks: bool) -> Self {
         self.wrap_bitmasks = wrap_bitmasks;
         self
     }
@@ -158,7 +167,7 @@ impl<'a> GenConfig<'a> {
     /// use the types provided by `libc`. Because `libc` isn't implicitly included in crates we default
     /// to defining the types ourself. Setting this to `true` makes the generated file import types
     /// from `libc` instead of defining them itself.
-    pub fn use_libc_types(mut self, use_libc_types: bool) -> GenConfig<'a> {
+    pub fn use_libc_types(mut self, use_libc_types: bool) -> Self {
         self.use_libc_types = use_libc_types;
         self
     }
@@ -195,14 +204,14 @@ impl<'a> GenConfig<'a> {
     /// type HWND = winapi::HWND;
     /// type HINSTANCE = winapi::HINSTANCE;
     /// ```
-    pub fn extern_type_overrides(mut self, extern_type_overrides: &'a [(&'a str, &'a str)]) -> GenConfig<'a> {
+    pub fn extern_type_overrides(mut self, extern_type_overrides: &'a [(&'a str, &'a str)]) -> Self {
         self.extern_type_overrides = extern_type_overrides;
         self
     }
 }
 
 impl<'a> default::Default for GenConfig<'a> {
-    fn default() -> GenConfig<'a> {
+    fn default() -> Self {
         GenConfig {
             remove_type_prefix: false,
             remove_vk_result_prefix: true,
@@ -213,6 +222,7 @@ impl<'a> default::Default for GenConfig<'a> {
             camel_case_variants: true,
             snake_case_members: true,
             debug_c_strings: true,
+            use_native_enums: true,
             use_native_unions: false,
 
             wrap_bitmasks: true,
@@ -245,7 +255,7 @@ pub struct GenPreproc<'a, 'b> {
 }
 
 impl<'a, 'b> GenPreproc<'a, 'b> {
-    fn new(registry: &'a VkRegistry<'a>, version: VkVersion, extensions: &[&str], config: GenConfig<'b>) -> GenPreproc<'a, 'b> {
+    fn new(registry: &'a VkRegistry<'a>, version: VkVersion, extensions: &[&str], config: GenConfig<'b>) -> Self {
         let mut gen = GenPreproc {
             string_buffer: String::with_capacity(registry.buffer_cap()),
             types: HashMap::with_capacity(registry.types().len()),
@@ -534,6 +544,9 @@ impl<'a, 'b> GenPreproc<'a, 'b> {
             if !vn[start..end].chars().next().unwrap().is_digit(10) {
                 variant.set_name(&vn[start..end]);
             } else {variant.set_name(&vn[old_start..])}
+        } else if self.config.remove_type_prefix {
+            let vn = unsafe{ &*variant.name() };
+            variant.set_name(&vn[3..]);
         }
 
         if self.config.camel_case_variants {
@@ -668,7 +681,7 @@ pub struct GenTypes<'a> {
 
 impl<'a> GenTypes<'a> {
     /// Generate type definitions. Assumes presence of `./prelude_common.rs`.
-    pub fn new(processed: &'a GenPreproc) -> GenTypes<'a> {
+    pub fn new(processed: &'a GenPreproc) -> Self {
         let mut gen_types = GenTypes {
             config:       &processed.config,
             structs:      String::with_capacity(2usize.pow(17)),
@@ -718,9 +731,26 @@ impl<'a> GenTypes<'a> {
                                 }
                                 writeln!(structs, "{},", &*ident)
                             }
-                            MutArray(ident, count)    => writeln!(structs, "{}: [{}; {}],", &*f.field_name, &*ident, count),
-                            MutArrayEnum(ident, cons) => writeln!(structs, "{}: [{}; {}],", &*f.field_name, &*ident, &*cons),
-
+                            MutArray(ident, count) => {
+                                let mut fty = &*ident;
+                                if gen_types.config.remove_type_prefix && fty.starts_with("VK_") {
+                                    fty = &fty[3..];
+                                }
+                                writeln!(structs, "{}: [{}; {}],", &*f.field_name, fty, count)
+                            }
+                            MutArrayEnum(ident, cons) => {
+                                let mut fty = &*ident;
+                                let mut cons = &*cons;
+                                if gen_types.config.remove_type_prefix {
+                                    if fty.starts_with("VK_") {
+                                        fty = &fty[3..];
+                                    }
+                                    if cons.starts_with("VK_") {
+                                        cons = &cons[3..];
+                                    }
+                                }
+                                writeln!(structs, "{}: [{}; {}],", &*f.field_name, fty, cons)
+                            }
                             ConstArray(_, _)      |
                             ConstArrayEnum(_, _) => panic!("Unexpected const array in struct"),
                             Const(_)             => panic!("Unexpected const {}", name),
@@ -747,7 +777,14 @@ impl<'a> GenTypes<'a> {
                                     MutArray(_, s)        |
                                     ConstArray(_, s)     => writeln!(structs, include_str!("clone_array.rs"), n, s),
                                     MutArrayEnum(_, s)    |
-                                    ConstArrayEnum(_, s) => writeln!(structs, include_str!("clone_array.rs"), n, &*s),
+                                    ConstArrayEnum(_, s) => {
+                                        let count = if gen_types.config.remove_type_prefix && (*s).starts_with("VK_") {
+                                            &(*s)[3..]
+                                        } else {
+                                            &*s
+                                        };
+                                        writeln!(structs, include_str!("clone_array.rs"), n, count)
+                                    },
                                     _                    => writeln!(structs, "{0}: self.{0}.clone(),", n)
                                 }.unwrap()
                             }
@@ -866,17 +903,35 @@ impl<'a> GenTypes<'a> {
                 // Generate enum bindings
                 Enum{name, ref variants} => {
                     let enums = &mut gen_types.enums;
-                    let name = unsafe{ &*name };
-                    writeln!(enums, "#[repr(C)]\n#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]\npub enum {} {{", name).unwrap();
+                    let ename = unsafe{ &*name };
+                    if gen_types.config.use_native_enums {
+                        writeln!(enums, "#[repr(C)]\n#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]\npub enum {} {{", ename).unwrap();
 
-                    for v in variants {unsafe {
-                        match *v {
-                            Value{name, value} => writeln!(enums, "    {} = {},", &*name, value),
-                            Bitpos{..}         => panic!("Found bitpos in non-biflags enum")
-                        }.unwrap();
-                    }}
+                        for v in variants {unsafe {
+                            match *v {
+                                Value{name, value} => writeln!(enums, "    {} = {},", &*name, value),
+                                Bitpos{..}         => panic!("Found bitpos in non-biflags enum")
+                            }.unwrap();
+                        }}
 
-                    enums.push_str("}\n\n");
+                        enums.push_str("}\n\n");
+                    } else {
+                        writeln!(enums, "pub type {} = u32;", ename).unwrap();
+                        for v in variants {
+                            match *v {
+                                Value{name, value} => {
+                                    let vname = unsafe{ &*name };
+                                    let (sign, v) = if value >= 0 {
+                                        ("", value)
+                                    } else {
+                                        ("!", -value)
+                                    };
+                                    writeln!(enums, "pub const {}: u32 = {}{};", vname, sign, v).unwrap();
+                                },
+                                Bitpos{..} => panic!("Found bitpos in non-biflags enum")
+                            }
+                        }
+                    }
                 }
 
                 // Generate bitmasks
@@ -940,16 +995,20 @@ impl<'a> GenTypes<'a> {
                     use self::ConstType::*;
 
                     let consts = &mut gen_types.consts;
-                    let (name, value) = unsafe{ (&*name, (&*value).trim()) };
+                    let (mut name, value) = unsafe{ (&*name, (&*value).trim()) };
                     let mut typ = processed.const_types.get(name).map(|t| *t).unwrap_or(Unknown);
                     let mut slice_indices = (0, value.len());
 
-                    // Ignore enum variants that have been renamed in the Vulkan specs.
-                    if typ == Unknown &&
-                       name.starts_with("VK_") &&
-                       value.starts_with("VK_") {
-                        continue;
+                    if name.starts_with("VK_") {
+                        // Ignore enum variants that have been renamed in the Vulkan specs.
+                        if typ == Unknown && value.starts_with("VK_") {
+                            continue;
+                        }
+                        if gen_types.config.remove_type_prefix {
+                            name = &name[3..];
+                        }
                     }
+
 
                     for (b, c) in value.char_indices() {
                         match c {

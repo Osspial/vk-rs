@@ -34,10 +34,10 @@ impl<'a> GenConfig<'a> {
     }
 
     /// Whether or not to remove the `Vk` prefix on structs, enums, and typedefs.
-    /// 
+    ///
     /// As an example, take the struct `VkInstanceCreateInfo`. If this is set to `true`, the generator
     /// will turn that into `InstanceCreateInfo`.
-    /// 
+    ///
     /// Defaults to `false`.
     pub fn remove_type_prefix(mut self, remove_type_prefix: bool) -> GenConfig<'a> {
         self.remove_type_prefix = remove_type_prefix;
@@ -48,7 +48,7 @@ impl<'a> GenConfig<'a> {
     /// remove_type_prefix is also set to `true`. This flag exists primarily because Rust already
     /// contains a type named `Result` and one might desire to remove any ambiguity the `VkResult` type
     /// may cause.
-    /// 
+    ///
     /// Defaults to `true`.
     pub fn remove_vk_result_prefix(mut self, remove_vk_result_prefix: bool) -> GenConfig<'a> {
         self.remove_vk_result_prefix = remove_vk_result_prefix;
@@ -56,10 +56,10 @@ impl<'a> GenConfig<'a> {
     }
 
     /// Whether or not to remove the `vk` prefix from Vulkan commands.
-    /// 
+    ///
     /// For example, if we have the command `vkCreateInstance` setting this flag to `true` will turn
     /// that into `createInstance`.
-    /// 
+    ///
     /// Defaults to `true`.
     pub fn remove_command_prefix(mut self, remove_command_prefix: bool) -> GenConfig<'a> {
         self.remove_command_prefix = remove_command_prefix;
@@ -69,10 +69,10 @@ impl<'a> GenConfig<'a> {
     /// Whether or not to remove the padding from enum variants.
     ///
     /// For example, the Vulkan xml registry defines the enum `VkPresentModeKHR`, with a variant
-    /// `VK_PRESENT_MODE_IMMEDIATE_KHR`. If this is `true`, `VK_PRSESNT_MODE_` and `_KHR` will be will 
+    /// `VK_PRESENT_MODE_IMMEDIATE_KHR`. If this is `true`, `VK_PRSESNT_MODE_` and `_KHR` will be will
     /// be removed from start and end respectively, resulting in the variant name `IMMEDIATE`. If the
     /// variant does not have a suffix this will only remove the prefix.
-    /// 
+    ///
     /// Defaults to `true`.
     pub fn remove_variant_padding(mut self, remove_variant_padding: bool) -> GenConfig<'a> {
         self.remove_variant_padding = remove_variant_padding;
@@ -80,11 +80,11 @@ impl<'a> GenConfig<'a> {
     }
 
     /// Whether or not to remove the `VK_` prefix from bitmask variants.
-    /// 
+    ///
     /// For example, the xml registry defines the bitmask `VkQueueFlagBits` with the flag
     /// `VK_QUEUE_GRAPHICS_BIT`. If this is `true`, this will result in the variant being turned into
     /// `QUEUE_GRAPHICS_BIT`.
-    /// 
+    ///
     /// Defaults to `true`.
     pub fn remove_bitmask_prefix(mut self, remove_bitmask_prefix: bool) -> GenConfig<'a> {
         self.remove_bitmask_prefix = remove_bitmask_prefix;
@@ -92,12 +92,12 @@ impl<'a> GenConfig<'a> {
     }
 
     /// Whether or not to transform Vulkan command identifiers to be a Rust-y snake_case.
-    /// 
+    ///
     /// For example, the registry defines the command `vkCreateInstance`. If this is `true`, that
     /// command will be turned into `vk_create_instance`. This, and the other name-style-altering
     /// options, primarily exists for the purpose of having Vulkan code integrate more cleanly into
     /// native Rust code.
-    /// 
+    ///
     /// Defaults to `true`.
     pub fn snake_case_commands(mut self, snake_case_commands: bool) -> GenConfig<'a> {
         self.snake_case_commands = snake_case_commands;
@@ -105,10 +105,10 @@ impl<'a> GenConfig<'a> {
     }
 
     /// Whether or not to transform enum variants into CamelCase.
-    /// 
+    ///
     /// For example, if we look at `VkStructureType`'s `VK_STRUCTURE_TYPE_APPLICATION_INFO` setting
     /// this to `true` would result in the variant being turned into `VkStructureTypeApplicationInfo`.
-    /// 
+    ///
     /// Defaults to `true`.
     pub fn camel_case_variants(mut self, camel_case_variants: bool) -> GenConfig<'a> {
         self.camel_case_variants = camel_case_variants;
@@ -116,10 +116,10 @@ impl<'a> GenConfig<'a> {
     }
 
     /// Whether or not to transform struct/union members and command parameters into snake_case.
-    /// 
+    ///
     /// For example, if we look at the `VkApplicationInfo` struct's `applicationVersion` field, setting
     /// this to `true` would result in the field being turned into `application_version`.
-    /// 
+    ///
     /// Defaults to `true`.
     pub fn snake_case_members(mut self, snake_case_members: bool) -> GenConfig<'a> {
         self.snake_case_members = snake_case_members;
@@ -144,7 +144,7 @@ impl<'a> GenConfig<'a> {
         self
     }
 
-    /// Whether or not to wrap bitmasks with a set of convenience functions similar to the 
+    /// Whether or not to wrap bitmasks with a set of convenience functions similar to the
     /// [bitflags](https://doc.rust-lang.org/bitflags/bitflags/macro.bitflags!.html) crate.
     ///
     /// Defaults to `true`.
@@ -166,7 +166,7 @@ impl<'a> GenConfig<'a> {
     /// This defines a set of type overrides, primarily intended for use with the WSI extensions. It
     /// takes a slice of (&str, &str) tuples, with the left side being the name of the type and the
     /// right side being the new definition of the type.
-    /// 
+    ///
     /// For an example let's look at the Windows WSI extension, which includes the struct
     /// `VkWin32SurfaceCreateInfoKHR`. That struct takes a `HWND` and a `HINSTANCE` in order to let Vulkan
     /// draw to windows; however, the generator is unaware of both `HWND` and `HINSTANCE`, which are
@@ -179,14 +179,14 @@ impl<'a> GenConfig<'a> {
     ///     .extern_type_overrides(&[("HWND", "winapi::HWND"),
     ///                              ("HINSTANCE", "winapi::HINSTANCE")]);
     /// ```
-    /// 
-    /// This tells the generator to use the `winapi` defintions of HWND instead of the blind 
+    ///
+    /// This tells the generator to use the `winapi` defintions of HWND instead of the blind
     /// definition, making the generator produce these for the type defintions:
-    /// 
+    ///
     /// ```
     /// # mod winapi {
     /// #     // That's right, they're just being defined as `*const ()` again. Whatcha gonna do?
-    /// #     // 
+    /// #     //
     /// #     // In all seriousness, this is just here to make the example compile with `cargo test`. It would really
     /// #     // link to `winapi` if we were actually using the generator.
     /// #     pub type HWND = *const ();
@@ -229,7 +229,7 @@ pub struct GenPreproc<'a, 'b> {
     pub type_ord: Vec<&'a str>,
     /// Possible types for constants that can be easily assumed by the preprocessor. This is not a
     /// comprehensive list of all constant types, probably won't contain the types of all constants
-    /// defined by the API. Currently, it just tells what types are `usize`. 
+    /// defined by the API. Currently, it just tells what types are `usize`.
     pub const_types: HashMap<&'a str, ConstType>,
     /// A set of all types that can't have Debug and Clone implementations derived. This occurs when
     /// the type contains an array, and as such can't derive Clone (because arrays only implement Clone
@@ -366,7 +366,7 @@ impl<'a, 'b> GenPreproc<'a, 'b> {
                             }
                             self.add_type_recurse(ret)
                         },
-                        TypeDef{..} => 
+                        TypeDef{..} =>
                             if let TypeDef{typ, requires, ..} = *self.registry.types().get(type_ptr).unwrap() {
                                 self.add_type(&*typ);
                                 if let Some(requires) = to_option(requires) {
@@ -470,7 +470,7 @@ impl<'a, 'b> GenPreproc<'a, 'b> {
         }
 
         if let Some(i) = ident.find("FlagBits") {unsafe {
-            ident = &*self.append_char_func(|s| 
+            ident = &*self.append_char_func(|s|
                 for c in ident[..i].chars().chain("Flags".chars()).chain(ident[i+8..].chars()) {
                     s.push(c);
                 }
@@ -504,7 +504,7 @@ impl<'a, 'b> GenPreproc<'a, 'b> {
             let vn = unsafe{ &*variant.name() };
             // These are the indicies of various parts of the variant name, shown by example:
             // If the enum is named `VkImageType`, and has the variant `VK_IMAGE_TYPE_1D`:
-            // 
+            //
             // VK_IMAGE_TYPE_1D
             //               ^ `start` is this index
             // VK_IMAGE_TYPE_1D
@@ -537,7 +537,7 @@ impl<'a, 'b> GenPreproc<'a, 'b> {
         }
 
         if self.config.camel_case_variants {
-            unsafe{ 
+            unsafe{
                 let vn = &*variant.name();
                 let vn_new = self.append_char_func(
                     |s| {
@@ -612,7 +612,7 @@ impl<'a, 'b> GenPreproc<'a, 'b> {
 
         let prepushcap = self.string_buffer.capacity();
         let prepushlen = self.string_buffer.len();
-        // We want to have all of the string in one block of memory in order to save heap allocation time. 
+        // We want to have all of the string in one block of memory in order to save heap allocation time.
         processor(&mut self.string_buffer);
 
         if prepushcap != self.string_buffer.capacity() {
@@ -672,7 +672,7 @@ impl<'a> GenTypes<'a> {
         let mut gen_types = GenTypes {
             config:       &processed.config,
             structs:      String::with_capacity(2usize.pow(17)),
-            unions:       String::with_capacity(2usize.pow(13)),//take that you superstitious bastards 
+            unions:       String::with_capacity(2usize.pow(13)),//take that you superstitious bastards
             enums:        String::with_capacity(2usize.pow(15)),
             bitmasks:     String::with_capacity(2usize.pow(15)),
             handles:      String::with_capacity(2usize.pow(12)),
@@ -767,7 +767,7 @@ impl<'a> GenTypes<'a> {
                                     MutArray(t, _)        |
                                     ConstArray(t, _)      |
                                     MutArrayEnum(t, _)    |
-                                    ConstArrayEnum(t, _) => 
+                                    ConstArrayEnum(t, _) =>
                                         if gen_types.config.debug_c_strings && "c_char" == &*t {
                                             writeln!(structs, ".field(\"{0}\", &unsafe{{ CStr::from_ptr(&self.{0}[0]) }})", n)
                                         } else {writeln!(structs, ".field(\"{0}\", &&self.{0}[..])", n)},
@@ -783,7 +783,7 @@ impl<'a> GenTypes<'a> {
                 // auto-generated easily, albeit only on the nightly channel. Proper union generation will not be
                 // enabled by default until they become stable. Until then, they will be controlled by the
                 // use_native_unions flag in `GenConfig`.
-                // 
+                //
                 // Original Comment:
                 // Unions are currently a pain in the ass to do, as Rust does not have a stable implementation.     |
                 // What they do have, however, is an approved RFC that is currently being implemented. Until those  |
@@ -842,7 +842,7 @@ impl<'a> GenTypes<'a> {
                                     MutArray(t, _)        |
                                     ConstArray(t, _)      |
                                     MutArrayEnum(t, _)    |
-                                    ConstArrayEnum(t, _) => 
+                                    ConstArrayEnum(t, _) =>
                                         if gen_types.config.debug_c_strings && "c_char" == &*t {
                                             writeln!(unions, ".field(\"{0}\", &unsafe{{ CStr::from_ptr(&self.{0}[0]) }})", n)
                                         } else {writeln!(unions, ".field(\"{0}\", unsafe{{ &&self.{0}[..] }})", n)},
@@ -889,7 +889,7 @@ impl<'a> GenTypes<'a> {
                     if gen_types.config.wrap_bitmasks {
                         let mut all_bits = 0;
                         for v in variants {unsafe {
-                            let bits = 
+                            let bits =
                                 match *v {
                                     Value{value, ..}   => value,
                                     Bitpos{bitpos, ..} => 2isize.pow(bitpos)
@@ -903,7 +903,7 @@ impl<'a> GenTypes<'a> {
                         writeln!(bitmasks, "pub type {} = {};", name, flags_name).unwrap();
 
                         for v in variants {unsafe {
-                            let bits = 
+                            let bits =
                                 match *v {
                                     Value{value, ..}   => value,
                                     Bitpos{bitpos, ..} => 2isize.pow(bitpos)
@@ -935,7 +935,7 @@ impl<'a> GenTypes<'a> {
                     }
                 }
 
-                // Generate API constants, inferring the type. 
+                // Generate API constants, inferring the type.
                 ApiConst{name, value} => {
                     use self::ConstType::*;
 
@@ -950,21 +950,26 @@ impl<'a> GenTypes<'a> {
                        value.starts_with("VK_") {
                         continue;
                     }
-                    
+
                     for (b, c) in value.char_indices() {
                         match c {
-                            ')'                    => (),
+                            ')'                    => slice_indices.1 = b,
                             '(' if typ != Str      => slice_indices.0 = b+1,
-                            'U' if typ == Unsigned => slice_indices.1 = b,
+                            'U' if typ == Unsigned => (),
                             'U' if typ != Str      => panic!("Unexpected U in {:?} {}; {}", typ, name, c),
                             'L' if typ == Unsigned => typ = ULong,
                             'L' if typ == ULong    => typ = ULongLong,
                             '"'                    => typ = Str,
                             '.' if typ == Unsigned => typ = Float,
-                            'f' if typ == Float    => slice_indices.1 = b,
-                            _   if 
+                            'f' if typ == Float    => (),
+                            _   if
                                  typ == Unknown &&
                                  c.is_digit(10)    => typ = Unsigned,
+                            '-' if
+                                 (typ == Unsigned  ||
+                                  typ == ULongLong ||
+                                  typ == USize     ||
+                                  typ == Float) => (),
                             _   if
                                  (typ == Unsigned  ||
                                   typ == ULongLong ||
@@ -981,7 +986,7 @@ impl<'a> GenTypes<'a> {
                         ULong      => write!(consts, "pub const {}: c_ulong = ", name),
                         ULongLong  => write!(consts, "pub const {}: c_ulonglong =", name),
                         USize      => write!(consts, "pub const {}: size_t = ", name),
-                        Float      => writeln!(consts, "pub const {}: c_float = {};", name, sliced_value),
+                        Float      => writeln!(consts, "pub const {}: c_float = ", name),
                         Str        => writeln!(consts, "pub const {}: &'static str = {};", name, sliced_value),
                         Unknown    => panic!("Unknown const type")
                     }.unwrap();
@@ -990,10 +995,13 @@ impl<'a> GenTypes<'a> {
                         Unsigned   |
                         ULong      |
                         ULongLong  |
-                        USize     =>
-                            if '~' == sliced_value.chars().next().unwrap() {
-                                writeln!(consts, "!{};", &sliced_value[1..])
-                            } else {writeln!(consts, "{};", sliced_value)}.unwrap(),
+                        USize      |
+                        Float     => {
+                            let num_expr = sliced_value.chars().filter(|c| !c.is_alphabetic()).collect::<String>();
+                            if '~' == num_expr.chars().next().unwrap() {
+                                writeln!(consts, "!{};", &num_expr[1..])
+                            } else {writeln!(consts, "{};", num_expr)}.unwrap();
+                        }
                         _ => ()
                     }
                 }
@@ -1097,7 +1105,7 @@ impl<'a> GenTypes<'a> {
         writeln!(write, "mod libc_reexports {{").unwrap();
         writeln!(write, "{}", &self.libc_reexports).unwrap();
         writeln!(write, "}}").unwrap();
-        
+
         writeln!(write, "pub mod types {{").unwrap();
         writeln!(write, "#![allow(non_camel_case_types, dead_code)]").unwrap();
         if !self.config.snake_case_members {
@@ -1137,21 +1145,21 @@ pub enum ConstType {
 }
 
 impl<'a> VkRegistry<'a> {
-    /// Write global bindings for Vulkan API [`version`] \(1.0, 1.1, etc.) to the file [`write`] with 
+    /// Write global bindings for Vulkan API [`version`] \(1.0, 1.1, etc.) to the file [`write`] with
     /// the specified `extensions` and [`config`]
     /// # Examples
-    /// 
+    ///
     /// ```no_run
     /// # // external crate declarations seems to break the code, so this is a workaround that probably won't ever be replaced.
     /// # mod vk_api {
     /// #     pub const VK_XML: &'static [u8] = &[0];
     /// # }
-    /// # 
+    /// #
     /// # use vk_generator::{VkRegistry, GenConfig, VkVersion};
     /// # use std::env;
     /// # use std::fs::File;
     /// # use std::path::Path;
-    /// # 
+    /// #
     /// let out = env::var("OUT_DIR").unwrap();
     /// let mut file = File::create(&Path::new(&out).join("vk.rs")).unwrap();
     /// VkRegistry::new(vk_api::VK_XML).gen_global(&mut file,
@@ -1159,7 +1167,7 @@ impl<'a> VkRegistry<'a> {
     ///                                            &[],
     ///                                            GenConfig::new());
     /// ```
-    /// 
+    ///
     /// [`config`]: ./struct.GenConfig.html
     /// [`version`]: ./struct.VkVersion.html
     /// [`write`]: https://doc.rust-lang.org/stable/std/io/trait.Write.html
@@ -1193,21 +1201,21 @@ impl<'a> VkRegistry<'a> {
         writeln!(write, "}}}}").unwrap();
     }
 
-    /// Write struct bindings for Vulkan API [`version`] \(1.0, 1.1, etc.) to the file [`write`] with 
+    /// Write struct bindings for Vulkan API [`version`] \(1.0, 1.1, etc.) to the file [`write`] with
     /// the specified `extensions` and [`config`]
     /// # Examples
-    /// 
+    ///
     /// ```no_run
     /// # // Ditto.
     /// # mod vk_api {
     /// #     pub const VK_XML: &'static [u8] = &[0];
     /// # }
-    /// # 
+    /// #
     /// # use vk_generator::{VkRegistry, GenConfig, VkVersion};
     /// # use std::env;
     /// # use std::fs::File;
     /// # use std::path::Path;
-    /// # 
+    /// #
     /// let out = env::var("OUT_DIR").unwrap();
     /// let mut file = File::create(&Path::new(&out).join("vk.rs")).unwrap();
     /// VkRegistry::new(vk_api::VK_XML).gen_struct(&mut file,
@@ -1215,7 +1223,7 @@ impl<'a> VkRegistry<'a> {
     ///                                            &[],
     ///                                            GenConfig::new());
     /// ```
-    /// 
+    ///
     /// [`config`]: ./struct.GenConfig.html
     /// [`version`]: ./struct.VkVersion.html
     /// [`write`]: https://doc.rust-lang.org/stable/std/io/trait.Write.html
@@ -1268,12 +1276,12 @@ struct PeekNext<I: Iterator> {
 impl<I: Iterator> Iterator for PeekNext<I> where I::Item: Copy {
     type Item = (I::Item, I::Item);
     fn next(&mut self) -> Option<Self::Item> {
-        let cur = 
+        let cur =
             match self.peeked {
                 Some(_) => self.peeked.take(),
                 None    => self.iter.next()
             };
-        
+
         if let Some(cur) = cur {
             self.peeked = self.iter.next();
             match self.peeked {

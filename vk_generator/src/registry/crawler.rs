@@ -1,4 +1,4 @@
-//! Module that contains a crawler function that crawls through the vulkan xml and returns a 
+//! Module that contains a crawler function that crawls through the vulkan xml and returns a
 //! Registry struct
 use xml::reader::{Events, XmlEvent};
 use xml::name::OwnedName;
@@ -35,17 +35,17 @@ pub fn crawl<R: Read>(xml_events: Events<R>, registry: &mut VkRegistry) {
             }
 
             XmlEvent::EndElement{..} => {
-                // We don't have to go through the entire element stack - only the elements that have changed since 
+                // We don't have to go through the entire element stack - only the elements that have changed since
                 // the last access. Also, we only have to process the stack when an element is about to be removed.
                 for el in &vk_elements[popped_to..] {
                     match *el {
                         // This branch handles the various tags present in the vulkan xml file. Because each tag is only    |
                         // seen once, when it's pushed onto vk_elements, we don't have to have any checking inside to make  |
                         // sure we aren't looking at a duplicate tag.                                                       |
-                        Tag{name: ref tag_name, attributes: ref tag_attrs} => 
+                        Tag{name: ref tag_name, attributes: ref tag_attrs} =>
                             match &tag_name[..] {
                                 // Handle enum registration
-                                "enums"      => 
+                                "enums"      =>
                                     if let Some(name) = find_attribute(tag_attrs, "name") {
                                         cur_block = VkBlock::Enums;
                                         registry.push_type(type_buffer).ok();
@@ -96,7 +96,7 @@ pub fn crawl<R: Read>(xml_events: Events<R>, registry: &mut VkRegistry) {
                                         match category {
                                             "basetype"       |
                                             "bitmask"       => type_buffer = VkType::new_typedef(find_attribute(tag_attrs, "requires").map(|r| registry.append_str(r))),
-                                            "define"        => 
+                                            "define"        =>
                                                 if let Some(name) = find_attribute(tag_attrs, "name") {
                                                     type_buffer = VkType::new_define(registry.append_str(name));
                                                 } else {type_buffer = VkType::empty_define()},
@@ -105,9 +105,9 @@ pub fn crawl<R: Read>(xml_events: Events<R>, registry: &mut VkRegistry) {
                                             "group"         => type_buffer = VkType::Unhandled,
                                             "handle"        => type_buffer = VkType::empty_handle(),
                                             "include"       => type_buffer = VkType::Unhandled,
-                                            "struct"        => 
+                                            "struct"        =>
                                                 type_buffer = VkType::new_struct(registry.append_str(find_attribute(tag_attrs, "name").unwrap())),
-                                            "union"         => 
+                                            "union"         =>
                                                 type_buffer = VkType::new_union(registry.append_str(find_attribute(tag_attrs, "name").unwrap())),
                                             _               => panic!("Unexpected category")
                                         }
@@ -124,7 +124,7 @@ pub fn crawl<R: Read>(xml_events: Events<R>, registry: &mut VkRegistry) {
                                     if VkBlock::Types == cur_block =>
                                     match type_buffer {
                                         VkType::Struct{fields: ref mut members, ..}   |
-                                        VkType::Union{variants: ref mut members, ..} => 
+                                        VkType::Union{variants: ref mut members, ..} =>
                                             if let Some("true") = find_attribute(tag_attrs, "optional") {
                                                 members.push(VkMember::empty(true))
                                             } else {members.push(VkMember::empty(false))},
@@ -145,7 +145,7 @@ pub fn crawl<R: Read>(xml_events: Events<R>, registry: &mut VkRegistry) {
 
 
                                 // Register features. Features are the function/type declarations for the specific API version.
-                                "feature"    => 
+                                "feature"    =>
                                     if let Some(name) = find_attribute(tag_attrs, "name") {
                                         if let Some(version) = find_attribute(tag_attrs, "number") {
                                             cur_block = VkBlock::Feature;
@@ -154,7 +154,7 @@ pub fn crawl<R: Read>(xml_events: Events<R>, registry: &mut VkRegistry) {
                                         } else {panic!("Could not find feature number")}
                                     } else {panic!("Could not find feature name")},
                                 "require"
-                                    if VkBlock::Feature == cur_block => 
+                                    if VkBlock::Feature == cur_block =>
                                     interface_reqrem = VkReqRem::Require(find_attribute(tag_attrs, "profile").map(|s| registry.append_str(s))),
                                 "remove"
                                     if VkBlock::Feature == cur_block =>
@@ -239,7 +239,7 @@ pub fn crawl<R: Read>(xml_events: Events<R>, registry: &mut VkRegistry) {
                         // here. Each Characters branch is specific to a certain block type, and what block we're in is     |
                         // stored in the `cur_block` variable.                                                              |
                         Characters{ref chars, tags: (tag, tag1)}
-                            if VkBlock::Types == cur_block && 
+                            if VkBlock::Types == cur_block &&
                                "usage" != tag => {
                             let chars = &chars[..];
                             // Not every type contains the same tags; this match statement differentiates them so that they can |
@@ -247,30 +247,31 @@ pub fn crawl<R: Read>(xml_events: Events<R>, registry: &mut VkRegistry) {
                             match type_buffer {
                                 VkType::Struct{fields: ref mut members, ..} |
                                 VkType::Union{variants: ref mut members, ..} => {
-                                    let member = members.last_mut().unwrap();
-                                    match tag {
-                                        "member" => process_type(chars, &mut member.field_type),
-                                        "type"   => member.field_type.set_type(registry.append_str(chars)),
-                                        "name"   =>
-                                            // This exists as an `if let` block and isn't just `member.set_name(registry.append_str(chars))`    |
-                                            // because someone decided to have two fields in the entire vulkan xml contain the array size       |
-                                            // *inside* of the <name> tag. This is terribly inconvenient, and now I have to document exactly    |
-                                            // what is means and why it exists.                                                                 |
-                                            //                                                                                                  |
-                                            // `size` is just the size of the the array. `name_len` is how long the name (without [\d+]) is.    |
-                                            // For example, if the contents of <name> are "srcOffsets[2]", `name_len` is equal to 10 because    |
-                                            // "srcOffsets" is 10 characters long.                                                              |
-                                            if let Some((size, name_len)) = parse_array_index(chars) {
-                                                member.field_type.make_array(size);
-                                                member.set_name(registry.append_str(&chars[..name_len]));
-                                            } else {member.set_name(registry.append_str(chars))},
-                                        // Some arrays have their length defined as a constant value. This adds the name of that constant   |
-                                        // to the type buffer.
-                                        "enum"   => member.field_type.set_array_const(registry.append_str(chars)),
-                                        _        => ()
+                                    if let Some(member) = members.last_mut() {
+                                        match tag {
+                                            "member" => process_type(chars, &mut member.field_type),
+                                            "type"   => member.field_type.set_type(registry.append_str(chars)),
+                                            "name"   =>
+                                                // This exists as an `if let` block and isn't just `member.set_name(registry.append_str(chars))`    |
+                                                // because someone decided to have two fields in the entire vulkan xml contain the array size       |
+                                                // *inside* of the <name> tag. This is terribly inconvenient, and now I have to document exactly    |
+                                                // what is means and why it exists.                                                                 |
+                                                //                                                                                                  |
+                                                // `size` is just the size of the the array. `name_len` is how long the name (without [\d+]) is.    |
+                                                // For example, if the contents of <name> are "srcOffsets[2]", `name_len` is equal to 10 because    |
+                                                // "srcOffsets" is 10 characters long.                                                              |
+                                                if let Some((size, name_len)) = parse_array_index(chars) {
+                                                    member.field_type.make_array(size);
+                                                    member.set_name(registry.append_str(&chars[..name_len]));
+                                                } else {member.set_name(registry.append_str(chars))},
+                                            // Some arrays have their length defined as a constant value. This adds the name of that constant   |
+                                            // to the type buffer.
+                                            "enum"   => member.field_type.set_array_const(registry.append_str(chars)),
+                                            _        => ()
+                                        }
                                     }
                                 }
-                                VkType::TypeDef{ref mut typ, 
+                                VkType::TypeDef{ref mut typ,
                                                 ref mut name, ..} =>
                                     match tag {
                                         "type" =>
@@ -279,9 +280,10 @@ pub fn crawl<R: Read>(xml_events: Events<R>, registry: &mut VkRegistry) {
                                                 *typ = registry.append_str(chars)
                                             },
                                         "name" => *name = registry.append_str(chars),
+                                        "comment" => (),
                                         _ => panic!("Unexpected tag")
                                     },
-                                VkType::Handle{ref mut name, 
+                                VkType::Handle{ref mut name,
                                                ref mut dispatchable} =>
                                     match tag {
                                         "type" =>
@@ -299,13 +301,14 @@ pub fn crawl<R: Read>(xml_events: Events<R>, registry: &mut VkRegistry) {
                                 VkType::Define{ref mut name} =>
                                     match tag {
                                         "name" => *name = registry.append_str(chars),
+                                        "comment" |
                                         "type" => (),
                                         _      => panic!("Unexpected define tag")
                                     },
                                 VkType::FuncPointer{ref mut name, ref mut ret, ref mut params} =>
                                     match tag {
                                         "name" => *name = registry.append_str(chars),
-                                        "type" => 
+                                        "type" =>
                                             if let Some("type") = tag1 {
                                                 if let Some(&VkElType::Const(_)) = params.last() {
                                                     params.last_mut().unwrap().set_type(registry.append_str(chars))
@@ -333,7 +336,7 @@ pub fn crawl<R: Read>(xml_events: Events<R>, registry: &mut VkRegistry) {
                                                             p.make_array(parse_array_index(&chars[indices.0..indices.1]).unwrap().0)
                                                         }
                                                     }
-                                                    
+
                                                     if chars.ends_with("const") {
                                                         params.push(VkElType::empty_const())
                                                     }
@@ -363,6 +366,7 @@ pub fn crawl<R: Read>(xml_events: Events<R>, registry: &mut VkRegistry) {
                                                     }
                                                 }
                                             },
+                                        "comment" => (),
                                         _      => panic!("Unexpected define tag")
                                     },
                                 _ => ()
@@ -395,7 +399,7 @@ pub fn crawl<R: Read>(xml_events: Events<R>, registry: &mut VkRegistry) {
                                     }
                                 } else if tag1 == "proto" {
                                     match tag {
-                                        "type" => 
+                                        "type" =>
                                             if chars == "void" {
                                                 command_buffer.ret.make_void();
                                             } else {command_buffer.ret.set_type(registry.append_str(chars))},
@@ -486,7 +490,7 @@ fn parse_array_index(chars: &str) -> Option<(usize, usize)> {
 
             // The length of the actual name, dropping the array length. Is decremented in the iterator below.
             let mut name_len = chars.len()-1;
-            match chariter.skip_while(|c| {name_len -= 1; 
+            match chariter.skip_while(|c| {name_len -= 1;
                                            c.is_digit(10) | c.is_whitespace()}
                                            ).next() {
                 Some('[') => (),
@@ -504,7 +508,7 @@ fn process_type(chars: &str, field: &mut VkElType) {
     match chars {
         "const" => field.make_const(),
         "*"     => field.make_ptr(1),
-        _ 
+        _
             if &chars[0..1] == "[" =>
             match parse_array_index(chars) {
                 Some((size, _)) => {field.make_array(size);}

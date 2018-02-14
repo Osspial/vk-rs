@@ -28,6 +28,7 @@ macro_rules! handle_nondispatchable {
     }
 }
 
+#[allow(unused_macros)]
 macro_rules! vk_bitflags_wrapped {
     ($name: ident, $all: expr, $flag_type: ty) => {
         #[repr(C)]

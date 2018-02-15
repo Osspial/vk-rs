@@ -17,10 +17,12 @@ fn default_global() {
     let mut file = File::create(&Path::new(&out).join("default_global.rs")).unwrap();
     writeln!(file, "fn main() {{}} mod vk {{").unwrap();
     vk_generator::VkRegistry::new(vk_api::VK_XML)
-        .gen_global(&mut file,
-                    VkVersion(1, 0),
-                    &["VK_KHR_surface", "VK_EXT_debug_report"],
-                    Default::default());
+        .gen_global(
+            &mut file,
+            VkVersion(1, 0),
+            &["VK_KHR_surface", "VK_EXT_debug_report"],
+            Default::default()
+        );
     writeln!(file, "}}").unwrap();
 
     assert_eq!("", str::from_utf8(&Command::new("rustc").current_dir(&out).arg("default_global.rs").output().unwrap().stderr).unwrap());
@@ -34,10 +36,12 @@ fn default_struct() {
     let mut file = File::create(&Path::new(&out).join("default_struct.rs")).unwrap();
     writeln!(file, "fn main() {{}} mod vk {{").unwrap();
     vk_generator::VkRegistry::new(vk_api::VK_XML)
-        .gen_struct(&mut file,
-                    VkVersion(1, 0),
-                    &["VK_KHR_surface", "VK_EXT_debug_report"],
-                    Default::default());
+        .gen_struct(
+            &mut file,
+            VkVersion(1, 0),
+            &["VK_KHR_surface", "VK_EXT_debug_report"],
+            Default::default()
+        );
     writeln!(file, "}}").unwrap();
 
     assert_eq!("", str::from_utf8(&Command::new("rustc").current_dir(&out).arg("default_struct.rs").output().unwrap().stderr).unwrap());
@@ -52,22 +56,26 @@ fn nondefault_global() {
     writeln!(file, "{}", include_str!("./libc_dummy.rs")).unwrap();
     writeln!(file, "fn main() {{}} mod vk {{").unwrap();
     vk_generator::VkRegistry::new(vk_api::VK_XML)
-        .gen_global(&mut file,
-                    VkVersion(1, 0),
-                    &["VK_KHR_surface", "VK_EXT_debug_report"],
-                    GenConfig::new()
-                        .remove_type_prefix(true)
-                        .remove_vk_result_prefix(false)
-                        .remove_command_prefix(false)
-                        .remove_bitmask_prefix(false)
-                        .remove_const_prefix(false)
-                        .variant_padding(VariantPaddingConfig::RemovePrefix)
-                        .snake_case_commands(false)
-                        .camel_case_variants(false)
-                        .snake_case_members(false)
-                        .use_native_enums(false)
-                        .wrap_bitmasks(false)
-                        .use_libc_types(true));
+        .gen_global(
+            &mut file,
+            VkVersion(1, 0),
+            &["VK_KHR_surface", "VK_EXT_debug_report"],
+            GenConfig {
+                remove_type_prefix: true,
+                remove_vk_result_prefix: false,
+                remove_command_prefix: false,
+                remove_bitmask_prefix: false,
+                remove_const_prefix: false,
+                variant_padding: VariantPaddingConfig::RemovePrefix,
+                snake_case_commands: false,
+                camel_case_variants: false,
+                snake_case_members: false,
+                use_native_enums: false,
+                wrap_bitmasks: false,
+                use_libc_types: true,
+                ..GenConfig::default()
+            },
+        );
     writeln!(file, "}}").unwrap();
 
     assert_eq!("", str::from_utf8(&Command::new("rustc").current_dir(&out).arg("nondefault_global.rs").output().unwrap().stderr).unwrap());
@@ -82,22 +90,26 @@ fn nondefault_struct() {
     writeln!(file, "{}", include_str!("./libc_dummy.rs")).unwrap();
     writeln!(file, "fn main() {{}} mod vk {{").unwrap();
     vk_generator::VkRegistry::new(vk_api::VK_XML)
-        .gen_struct(&mut file,
-                    VkVersion(1, 0),
-                    &["VK_KHR_surface", "VK_EXT_debug_report"],
-                    GenConfig::new()
-                        .remove_type_prefix(true)
-                        .remove_vk_result_prefix(false)
-                        .remove_command_prefix(false)
-                        .remove_bitmask_prefix(false)
-                        .remove_const_prefix(false)
-                        .variant_padding(VariantPaddingConfig::Keep)
-                        .snake_case_commands(false)
-                        .camel_case_variants(false)
-                        .snake_case_members(false)
-                        .use_native_enums(false)
-                        .wrap_bitmasks(false)
-                        .use_libc_types(true));
+        .gen_struct(
+            &mut file,
+            VkVersion(1, 0),
+            &["VK_KHR_surface", "VK_EXT_debug_report"],
+            GenConfig {
+                remove_type_prefix: true,
+                remove_vk_result_prefix: false,
+                remove_command_prefix: false,
+                remove_bitmask_prefix: false,
+                remove_const_prefix: false,
+                variant_padding: VariantPaddingConfig::Keep,
+                snake_case_commands: false,
+                camel_case_variants: false,
+                snake_case_members: false,
+                use_native_enums: false,
+                wrap_bitmasks: false,
+                use_libc_types: true,
+                ..GenConfig::default()
+            }
+        );
     writeln!(file, "}}").unwrap();
 
     assert_eq!("", str::from_utf8(&Command::new("rustc").current_dir(&out).arg("nondefault_struct.rs").output().unwrap().stderr).unwrap());

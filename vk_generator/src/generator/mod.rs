@@ -15,70 +15,34 @@ pub enum VariantPaddingConfig {
     Keep,
     /// Remove `VK_` prefix only.
     RemovePrefix,
-    /// Remove the prefix part, type name, and the extension suffix..
+    /// Remove the prefix part, type name, and the extension suffix.
     Strip,
 }
 
-/// Configuration options fot the Vulkan generator
+/// Configuration options fot the Vulkan generator.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GenConfig<'a> {
-    pub remove_type_prefix: bool,
-    pub remove_vk_result_prefix: bool,
-    pub remove_command_prefix: bool,
-    pub remove_bitmask_prefix: bool,
-    pub remove_const_prefix: bool,
-    pub variant_padding: VariantPaddingConfig,
-    pub snake_case_commands: bool,
-    pub camel_case_variants: bool,
-    pub snake_case_members: bool,
-    pub debug_c_strings: bool,
-    pub use_native_enums: bool,
-    pub use_native_unions: bool,
-
-    pub wrap_bitmasks: bool,
-    pub use_libc_types: bool,
-    pub extern_type_overrides: &'a [(&'a str, &'a str)]
-}
-
-impl<'a> GenConfig<'a> {
-    /// Create a new generator config. Is identical to `Default::default()`.
-    pub fn new() -> Self {
-        Default::default()
-    }
-
     /// Whether or not to remove the `Vk` prefix on structs, enums, and typedefs.
     ///
     /// As an example, take the struct `VkInstanceCreateInfo`. If this is set to `true`, the generator
     /// will turn that into `InstanceCreateInfo`.
     ///
     /// Defaults to `false`.
-    pub fn remove_type_prefix(mut self, remove_type_prefix: bool) -> Self {
-        self.remove_type_prefix = remove_type_prefix;
-        self
-    }
-
+    pub remove_type_prefix: bool,
     /// Whether or not to remove the `Vk` prefix from the `VkResult` enum, **IF AND ONLY IF**
     /// remove_type_prefix is also set to `true`. This flag exists primarily because Rust already
     /// contains a type named `Result` and one might desire to remove any ambiguity the `VkResult` type
     /// may cause.
     ///
     /// Defaults to `true`.
-    pub fn remove_vk_result_prefix(mut self, remove_vk_result_prefix: bool) -> Self {
-        self.remove_vk_result_prefix = remove_vk_result_prefix;
-        self
-    }
-
+    pub remove_vk_result_prefix: bool,
     /// Whether or not to remove the `vk` prefix from Vulkan commands.
     ///
     /// For example, if we have the command `vkCreateInstance` setting this flag to `true` will turn
     /// that into `createInstance`.
     ///
     /// Defaults to `true`.
-    pub fn remove_command_prefix(mut self, remove_command_prefix: bool) -> Self {
-        self.remove_command_prefix = remove_command_prefix;
-        self
-    }
-
+    pub remove_command_prefix: bool,
     /// Whether or not to remove the `VK_` prefix from bitmask variants.
     ///
     /// For example, the xml registry defines the bitmask `VkQueueFlagBits` with the flag
@@ -86,11 +50,7 @@ impl<'a> GenConfig<'a> {
     /// `QUEUE_GRAPHICS_BIT`.
     ///
     /// Defaults to `true`.
-    pub fn remove_bitmask_prefix(mut self, remove_bitmask_prefix: bool) -> Self {
-        self.remove_bitmask_prefix = remove_bitmask_prefix;
-        self
-    }
-
+    pub remove_bitmask_prefix: bool,
     /// Whether or not to remove the `VK_` prefix from constant names.
     ///
     /// For example, the xml registry defines the constant `VK_MAX_EXTENSION_NAME_SIZE`.
@@ -98,19 +58,11 @@ impl<'a> GenConfig<'a> {
     /// `MAX_EXTENSION_NAME_SIZE`.
     ///
     /// Defaults to `true`.
-    pub fn remove_const_prefix(mut self, remove_const_prefix: bool) -> Self {
-        self.remove_const_prefix = remove_const_prefix;
-        self
-    }
-
+    pub remove_const_prefix: bool,
     /// How to handle enum variants, see `VariantPaddingConfig` for details.
     ///
     /// Defaults to `VariantPaddingConfig::Strip`.
-    pub fn variant_padding(mut self, variant_padding: VariantPaddingConfig) -> Self {
-        self.variant_padding = variant_padding;
-        self
-    }
-
+    pub variant_padding: VariantPaddingConfig,
     /// Whether or not to transform Vulkan command identifiers to be a Rust-y snake_case.
     ///
     /// For example, the registry defines the command `vkCreateInstance`. If this is `true`, that
@@ -119,78 +71,47 @@ impl<'a> GenConfig<'a> {
     /// native Rust code.
     ///
     /// Defaults to `true`.
-    pub fn snake_case_commands(mut self, snake_case_commands: bool) -> Self {
-        self.snake_case_commands = snake_case_commands;
-        self
-    }
-
+    pub snake_case_commands: bool,
     /// Whether or not to transform enum variants into CamelCase.
     ///
     /// For example, if we look at `VkStructureType`'s `VK_STRUCTURE_TYPE_APPLICATION_INFO` setting
     /// this to `true` would result in the variant being turned into `VkStructureTypeApplicationInfo`.
     ///
     /// Defaults to `true`.
-    pub fn camel_case_variants(mut self, camel_case_variants: bool) -> Self {
-        self.camel_case_variants = camel_case_variants;
-        self
-    }
-
+    pub camel_case_variants: bool,
     /// Whether or not to transform struct/union members and command parameters into snake_case.
     ///
     /// For example, if we look at the `VkApplicationInfo` struct's `applicationVersion` field, setting
     /// this to `true` would result in the field being turned into `application_version`.
     ///
     /// Defaults to `true`.
-    pub fn snake_case_members(mut self, snake_case_members: bool) -> Self {
-        self.snake_case_members = snake_case_members;
-        self
-    }
-
+    pub snake_case_members: bool,
     /// When printing structs with fields that are arrays of c_chars, whether to print them as arrays
     /// of bytes or as a string.
     ///
     /// Defaults to `true`.
-    pub fn debug_c_strings(mut self, debug_c_strings: bool) -> Self {
-        self.debug_c_strings = debug_c_strings;
-        self
-    }
-
+    pub debug_c_strings: bool,
     /// Whether or not to use the `enum` keyword to create native tagged unions.
     ///
     /// Defaults to `true`.
-    pub fn use_native_enums(mut self, use_native_enums: bool) -> Self {
-        self.use_native_enums = use_native_enums;
-        self
-    }
-
+    pub use_native_enums: bool,
     /// Whether or not to use the unstable `union` keyword to create native untagged unions.
     /// Currently relies on the `untagged_unions` feature.
     ///
     /// Defaults to `false`.
-    pub fn use_native_unions(mut self, use_native_unions: bool) -> Self {
-        self.use_native_unions = use_native_unions;
-        self
-    }
+    pub use_native_unions: bool,
 
     /// Whether or not to wrap bitmasks with a set of convenience functions similar to the
     /// [bitflags](https://doc.rust-lang.org/bitflags/bitflags/macro.bitflags!.html) crate.
     ///
     /// Defaults to `true`.
-    pub fn wrap_bitmasks(mut self, wrap_bitmasks: bool) -> Self {
-        self.wrap_bitmasks = wrap_bitmasks;
-        self
-    }
-
+    pub wrap_bitmasks: bool,
     /// The Vulkan library uses a lot of `C` types, as per it's nature of exposing a `C` ABI. There are
     /// a few ways we can handle using those types: either we can define the typedefs ourself or we can
     /// use the types provided by `libc`. Because `libc` isn't implicitly included in crates we default
     /// to defining the types ourself. Setting this to `true` makes the generated file import types
     /// from `libc` instead of defining them itself.
-    pub fn use_libc_types(mut self, use_libc_types: bool) -> Self {
-        self.use_libc_types = use_libc_types;
-        self
-    }
-
+    pub use_libc_types: bool,
     /// This defines a set of type overrides, primarily intended for use with the WSI extensions. It
     /// takes a slice of (&str, &str) tuples, with the left side being the name of the type and the
     /// right side being the new definition of the type.
@@ -203,9 +124,13 @@ impl<'a> GenConfig<'a> {
     ///
     /// ```
     /// # use vk_generator::GenConfig;
-    /// GenConfig::new()
-    ///     .extern_type_overrides(&[("HWND", "winapi::HWND"),
-    ///                              ("HINSTANCE", "winapi::HINSTANCE")]);
+    /// let config = GenConfig {
+    ///     extern_type_overrides: &[
+    ///         ("HWND", "winapi::HWND"),
+    ///         ("HINSTANCE", "winapi::HINSTANCE")
+    ///     ],
+    ///     ..GenConfig::default()
+    /// };
     /// ```
     ///
     /// This tells the generator to use the `winapi` defintions of HWND instead of the blind
@@ -223,9 +148,13 @@ impl<'a> GenConfig<'a> {
     /// type HWND = winapi::HWND;
     /// type HINSTANCE = winapi::HINSTANCE;
     /// ```
-    pub fn extern_type_overrides(mut self, extern_type_overrides: &'a [(&'a str, &'a str)]) -> Self {
-        self.extern_type_overrides = extern_type_overrides;
-        self
+    pub extern_type_overrides: &'a [(&'a str, &'a str)]
+}
+
+impl<'a> GenConfig<'a> {
+    /// Create a new generator config. Is identical to `Default::default()`.
+    pub fn new() -> Self {
+        Default::default()
     }
 }
 
@@ -1244,10 +1173,12 @@ impl<'a> VkRegistry<'a> {
     /// #
     /// let out = env::var("OUT_DIR").unwrap();
     /// let mut file = File::create(&Path::new(&out).join("vk.rs")).unwrap();
-    /// VkRegistry::new(vk_api::VK_XML).gen_global(&mut file,
-    ///                                            VkVersion(1, 0),
-    ///                                            &[],
-    ///                                            GenConfig::new());
+    /// VkRegistry::new(vk_api::VK_XML).gen_global(
+    ///     &mut file,
+    ///     VkVersion(1, 0),
+    ///     &[],
+    ///     GenConfig::new()
+    /// );
     /// ```
     ///
     /// [`config`]: ./struct.GenConfig.html
@@ -1300,10 +1231,12 @@ impl<'a> VkRegistry<'a> {
     /// #
     /// let out = env::var("OUT_DIR").unwrap();
     /// let mut file = File::create(&Path::new(&out).join("vk.rs")).unwrap();
-    /// VkRegistry::new(vk_api::VK_XML).gen_struct(&mut file,
-    ///                                            VkVersion(1, 0),
-    ///                                            &[],
-    ///                                            GenConfig::new());
+    /// VkRegistry::new(vk_api::VK_XML).gen_struct(
+    ///     &mut file,
+    ///     VkVersion(1, 0),
+    ///     &[],
+    ///     GenConfig::new()
+    /// );
     /// ```
     ///
     /// [`config`]: ./struct.GenConfig.html

@@ -1227,6 +1227,7 @@ impl<'a> VkRegistry<'a> {
             writeln!(write, ";\n").unwrap();
         }}
         writeln!(write, "}}}}").unwrap();
+        writeln!(write, "}} // end module").unwrap();
     }
 
     /// Write struct bindings for Vulkan API [`version`] \(1.0, 1.1, etc.) to the file [`write`] with
@@ -1286,6 +1287,7 @@ impl<'a> VkRegistry<'a> {
             writeln!(write, ";\n").unwrap();
         }}
         writeln!(write, "}}}}").unwrap();
+        writeln!(write, "}} // end module").unwrap();
     }
 }
 

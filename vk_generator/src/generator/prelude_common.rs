@@ -1,4 +1,6 @@
-#![allow(non_upper_case_globals)]
+pub use self::__vk_generator_types::*;
+#[allow(non_upper_case_globals)]
+mod __vk_generator_types {
 
 pub use std::os::raw::c_ulonglong;
 pub use self::types::*;

@@ -1,6 +1,6 @@
 # vk-rs [![Build Status](https://travis-ci.org/Osspial/vk-rs.svg?branch=master)](https://travis-ci.org/Osspial/vk-rs)
 This repository contiains the necessary starting blocks for building a wrapper around the Vulkan
-API. 
+API.
 
 
 ## [vk_generator](./vk_generator) [![Version](https://img.shields.io/crates/v/vk_generator.svg)](https://crates.io/crates/vk_generator)
@@ -8,7 +8,7 @@ Generate bindings to the Vulkan API.
 
 ```toml
 [build-dependencies]
-vk_generator = "0.1.0"
+vk_generator = "0.3.0"
 ```
 
 

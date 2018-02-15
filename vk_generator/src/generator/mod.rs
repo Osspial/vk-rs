@@ -690,15 +690,18 @@ impl<'a> GenTypes<'a> {
                         writeln!(structs, "#[derive(Debug, Clone)]").unwrap();
                     }
                     writeln!(structs, "#[repr(C)]\npub struct {} {{", name).unwrap();
+                    let type_wrappable_by_option = |type_ident: &str| {
+                        match processed.registry.types().get(type_ident) {
+                            Some(&VkType::FuncPointer{..}) => true,
+                            _ => false
+                        }
+                    };
 
                     for f in fields { unsafe {
                         write!(structs, "    pub ").unwrap();
                         match f.field_type {
                             Var(ident) => {
-                                let wrap_with_option = f.optional & match processed.registry.types().get(&*f.field_type.type_ptr().unwrap()) {
-                                    Some(&VkType::FuncPointer{..}) => true,
-                                    _ => false
-                                };
+                                let wrap_with_option = f.optional & type_wrappable_by_option(&*ident);
                                 match wrap_with_option {
                                     true => writeln!(structs, "{}: Option<{}>,", &*f.field_name, &*ident),
                                     false => writeln!(structs, "{}: {},", &*f.field_name, &*ident)
@@ -764,7 +767,10 @@ impl<'a> GenTypes<'a> {
                             let n = &* f.field_name;
 
                             if let Some(&FuncPointer{..}) = processed.registry.types().get(&*f.field_type.type_ptr().unwrap()) {
-                                writeln!(structs, ".field(\"{0}\", &(self.{0} as *const ()))", n).unwrap();
+                                match f.optional {
+                                    true => writeln!(structs, ".field(\"{0}\", &(self.{0}.map(|f| f as *const ())))", n),
+                                    false => writeln!(structs, ".field(\"{0}\", &(self.{0} as *const ()))", n)
+                                }.unwrap()
                             } else {
                                 match f.field_type {
                                     MutArray(t, _)        |

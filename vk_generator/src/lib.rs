@@ -1,9 +1,9 @@
-//! Automatically generates bindings for the Vulkan API. In order to use, first create a 
+//! Automatically generates bindings for the Vulkan API. In order to use, first create a
 //! [`VkRegistry`] struct with a valid Vulkan XML file, and then call either one of the two
 //! generation functions ([`gen_global()`] or [`gen_struct()`]) or a custom one. Further
 //! documentation can be found in [`VkRegistry`] and [`GenConfig`], and looking over the provided
 //! [examples](https://github.com/Osspial/vk-rs/tree/master/vk_generator/examples) is encouraged.
-//! 
+//!
 //! [`VkRegistry`]: ./struct.VkRegistry.html
 //! [`GenConfig`]: ./struct.GenConfig.html
 //! [`gen_global()`]: ./struct.VkRegistry.html#method.gen_global
@@ -25,7 +25,7 @@ mod registry;
 mod generator;
 
 pub use registry::{VkRegistry, VkVersion};
-pub use generator::GenConfig;
+pub use generator::{GenConfig, VariantPaddingConfig};
 
 #[inline]
 fn to_option<'u>(s: *const str) -> Option<&'u str> {

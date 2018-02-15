@@ -449,14 +449,14 @@ impl fmt::Debug for VkVariant {
 impl VkVariant {
     fn new_value(name: *const str, value: isize) -> Self {
         VkVariant::Value {
-            name: name,
+            name,
             value: value
         }
     }
 
     fn new_bitpos(name: *const str, bitpos: u32) -> Self {
         VkVariant::Bitpos {
-            name: name,
+            name,
             bitpos: bitpos
         }
     }
@@ -482,27 +482,27 @@ impl VkVariant {
 pub enum VkType {
     Struct {
         name: *const str,
-        fields: Vec<VkMember>
+        fields: Vec<VkMember>,
     },
 
     Union {
         name: *const str,
-        variants: Vec<VkMember>
+        variants: Vec<VkMember>,
     },
 
     Enum {
         name: *const str,
-        variants: Vec<VkVariant>
+        variants: Vec<VkVariant>,
     },
 
     Bitmask {
         name: *const str,
-        variants: Vec<VkVariant>
+        variants: Vec<VkVariant>,
     },
 
     Handle {
         name: *const str,
-        dispatchable: bool
+        dispatchable: bool,
     },
 
     TypeDef {
@@ -516,26 +516,26 @@ pub enum VkType {
 
     ApiConst {
         name: *const str,
-        value: *const str
+        value: *const str,
     },
 
     // Defines are hardcoded into the generator, as procedurally generating them would be hard as hell
     Define {
-        name: *const str
+        name: *const str,
     },
 
     FuncPointer {
         name: *const str,
         ret: VkElType,
-        params: Vec<VkElType>
+        params: Vec<VkElType>,
     },
 
     ExternType {
         name: *const str,
-        requires: *const str
+        requires: *const str,
     },
 
-    Unhandled
+    Unhandled,
 }
 
 impl VkType {
@@ -552,7 +552,7 @@ impl VkType {
             Define{name, ..}       |
             FuncPointer{name, ..}  |
             ExternType{name, ..}  => Some(name),
-            Unhandled             => None
+            Unhandled             => None,
         }
     }
 
@@ -575,28 +575,28 @@ impl VkType {
 
     pub fn new_struct(name: *const str) -> Self {
         VkType::Struct {
-            name: name,
+            name,
             fields: Vec::with_capacity(8)
         }
     }
 
     pub fn new_union(name: *const str) -> Self {
         VkType::Union {
-            name: name,
+            name,
             variants: Vec::with_capacity(8)
         }
     }
 
     pub fn new_enum(name: *const str) -> Self {
         VkType::Enum {
-            name: name,
+            name,
             variants: Vec::with_capacity(8)
         }
     }
 
     pub fn new_bitmask(name: *const str) -> Self {
         VkType::Bitmask {
-            name: name,
+            name,
             variants: Vec::with_capacity(8)
         }
     }
@@ -618,14 +618,14 @@ impl VkType {
 
     pub fn new_const(name: *const str, value: *const str) -> Self {
         VkType::ApiConst {
-            name: name,
-            value: value
+            name,
+            value,
         }
     }
 
     pub fn new_define(name: *const str) -> Self {
         VkType::Define  {
-            name: name
+            name,
         }
     }
 
@@ -645,8 +645,8 @@ impl VkType {
 
     pub fn new_extern(name: *const str, requires: *const str) -> Self {
         VkType::ExternType {
-            name: name,
-            requires: requires
+            name,
+            requires,
         }
     }
 }
@@ -656,7 +656,7 @@ pub struct VkCommand {
     /// The return value
     pub ret: VkElType,
     pub name: *const str,
-    pub params: Vec<VkParam>
+    pub params: Vec<VkParam>,
 }
 
 impl fmt::Debug for VkCommand {
@@ -674,7 +674,7 @@ impl VkCommand {
         VkCommand {
             ret: VkElType::Unknown,
             name: null_str(),
-            params: Vec::with_capacity(8)
+            params: Vec::with_capacity(8),
         }
     }
 }
@@ -682,7 +682,7 @@ impl VkCommand {
 #[derive(Clone)]
 pub struct VkParam {
     pub typ: VkElType,
-    pub name: *const str
+    pub name: *const str,
 }
 
 impl fmt::Debug for VkParam {
@@ -723,16 +723,16 @@ pub struct VkFeature {
     pub name: *const str,
     pub version: VkVersion,
     pub require: Vec<VkInterface>,
-    pub remove: Vec<VkInterface>
+    pub remove: Vec<VkInterface>,
 }
 
 impl VkFeature {
     fn new(name: *const str, version: VkVersion) -> Self {
         VkFeature {
-            name: name,
+            name,
             version: version,
             require: Vec::with_capacity(16),
-            remove: Vec::with_capacity(16)
+            remove: Vec::with_capacity(16),
         }
     }
 
@@ -770,31 +770,31 @@ impl VkFeature {
 pub enum VkInterface {
     Command {
         name: *const str,
-        profile: *const str
+        profile: *const str,
     },
 
     Type {
         name: *const str,
-        profile: *const str
+        profile: *const str,
     },
 
     /// A new constant that is defined in an extension.
     ConstDef {
         name: *const str,
         value: *const str,
-        profile: *const str
+        profile: *const str,
     },
 
     /// Defines interface to constant defined in "API Constants" enum tag
     ApiConst {
         name: *const str,
-        profile: *const str
+        profile: *const str,
     },
 
     ExtnEnum {
         extends: *const str,
         profile: *const str,
-        variant: VkVariant
+        variant: VkVariant,
     }
 }
 
@@ -839,30 +839,30 @@ impl fmt::Debug for VkInterface {
 impl VkInterface {
     fn new_command(name: *const str, profile: Option<*const str>) -> Self {
         VkInterface::Command {
-            name: name,
+            name,
             profile: profile.unwrap_or(null_str())
         }
     }
 
     fn new_type(name: *const str, profile: Option<*const str>) -> Self {
         VkInterface::Type {
-            name: name,
-            profile: profile.unwrap_or(null_str())
+            name,
+            profile: profile.unwrap_or(null_str()),
         }
     }
 
     fn new_const_def(name: *const str, value: *const str, profile: Option<*const str>) -> Self {
         VkInterface::ConstDef {
-            name: name,
-            value: value,
-            profile: profile.unwrap_or(null_str())
+            name,
+            value,
+            profile: profile.unwrap_or(null_str()),
         }
     }
 
     fn new_api_const(name: *const str, profile: Option<*const str>) -> Self {
         VkInterface::ApiConst {
-            name: name,
-            profile: profile.unwrap_or(null_str())
+            name,
+            profile: profile.unwrap_or(null_str()),
         }
     }
 
@@ -870,7 +870,7 @@ impl VkInterface {
         VkInterface::ExtnEnum {
             extends: extends.unwrap_or(null_str()),
             profile: profile.unwrap_or(null_str()),
-            variant: variant
+            variant,
         }
     }
 }
@@ -879,24 +879,24 @@ impl VkInterface {
 enum VkReqRem {
     Require(Option<*const str>),
     Remove(Option<*const str>),
-    None
+    None,
 }
 
 pub struct VkExtn {
     pub name: *const str,
     pub num: isize,
     pub require: Vec<VkInterface>,
-    pub remove: Vec<VkInterface>
+    pub remove: Vec<VkInterface>,
 }
 
 impl VkExtn {
     fn new(name: *const str, num: isize) -> Self {
         VkExtn {
-            name: name,
-            num: num,
+            name,
+            num,
             require: Vec::with_capacity(8),
             // Most, if not all, extensions don't have remove tags so this is just here for contingency
-            remove: Vec::new()
+            remove: Vec::new(),
         }
     }
 

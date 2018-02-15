@@ -7,7 +7,7 @@ use std::process::Command;
 use std::io::Write;
 use std::str;
 
-use vk_generator::{VkVersion, GenConfig};
+use vk_generator::{VkVersion, GenConfig, VariantPaddingConfig};
 
 #[test]
 fn default_global() {
@@ -59,8 +59,9 @@ fn nondefault_global() {
                         .remove_type_prefix(true)
                         .remove_vk_result_prefix(false)
                         .remove_command_prefix(false)
-                        .remove_variant_padding(false)
                         .remove_bitmask_prefix(false)
+                        .remove_const_prefix(false)
+                        .variant_padding(VariantPaddingConfig::RemovePrefix)
                         .snake_case_commands(false)
                         .camel_case_variants(false)
                         .snake_case_members(false)
@@ -88,8 +89,9 @@ fn nondefault_struct() {
                         .remove_type_prefix(true)
                         .remove_vk_result_prefix(false)
                         .remove_command_prefix(false)
-                        .remove_variant_padding(false)
                         .remove_bitmask_prefix(false)
+                        .remove_const_prefix(false)
+                        .variant_padding(VariantPaddingConfig::Keep)
                         .snake_case_commands(false)
                         .camel_case_variants(false)
                         .snake_case_members(false)

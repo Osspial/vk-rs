@@ -453,14 +453,6 @@ impl<'a, 'b> GenPreproc<'a, 'b> {
             }
         }
 
-        if let Some(i) = ident.find("FlagBits") {unsafe {
-            ident = &*self.append_char_func(|s|
-                for c in ident[..i].chars().chain("Flags".chars()).chain(ident[i+8..].chars()) {
-                    s.push(c);
-                }
-            );
-        }}
-
         ident
     }
 
@@ -953,13 +945,9 @@ impl<'a> GenTypes<'a> {
                 }
 
                 // Generate typedefs
-                TypeDef{name, typ, requires, ..} => {
-                    let (name, typ, requires) = unsafe{ (&*name, &*typ, to_option(requires)) };
-                    // If we're typedef-ing a flag and the flag bit types aren't defined, generate the raw typedef. Otherwise,
-                    // the typedef is handled in the `Bitmask` section of this generator.
-                    if (typ != "Flags" && typ != "VkFlags") || requires == None {
-                        writeln!(gen_types.typedefs, "pub type {} = {};", name, typ).unwrap();
-                    }
+                TypeDef{name, typ, ..} => {
+                    let (name, typ) = unsafe{ (&*name, &*typ) };
+                    writeln!(gen_types.typedefs, "pub type {} = {};", name, typ).unwrap();
                 }
 
                 // Generate API constants, inferring the type.

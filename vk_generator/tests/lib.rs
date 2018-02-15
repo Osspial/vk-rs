@@ -25,7 +25,10 @@ fn default_global() {
         );
     writeln!(file, "}}").unwrap();
 
-    assert_eq!("", str::from_utf8(&Command::new("rustc").current_dir(&out).arg("default_global.rs").output().unwrap().stderr).unwrap());
+    let error = String::from_utf8(Command::new("rustc").current_dir(&out).arg("default_global.rs").output().unwrap().stderr).unwrap();
+    if error != "" {
+        panic!("{}", error);
+    }
 }
 
 #[test]
@@ -44,7 +47,10 @@ fn default_struct() {
         );
     writeln!(file, "}}").unwrap();
 
-    assert_eq!("", str::from_utf8(&Command::new("rustc").current_dir(&out).arg("default_struct.rs").output().unwrap().stderr).unwrap());
+    let error = String::from_utf8(Command::new("rustc").current_dir(&out).arg("default_struct.rs").output().unwrap().stderr).unwrap();
+    if error != "" {
+        panic!("{}", error);
+    }
 }
 
 #[test]
@@ -78,7 +84,10 @@ fn nondefault_global() {
         );
     writeln!(file, "}}").unwrap();
 
-    assert_eq!("", str::from_utf8(&Command::new("rustc").current_dir(&out).arg("nondefault_global.rs").output().unwrap().stderr).unwrap());
+    let error = String::from_utf8(Command::new("rustc").current_dir(&out).arg("nondefault_global.rs").output().unwrap().stderr).unwrap();
+    if error != "" {
+        panic!("{}", error);
+    }
 }
 
 #[test]
@@ -112,5 +121,8 @@ fn nondefault_struct() {
         );
     writeln!(file, "}}").unwrap();
 
-    assert_eq!("", str::from_utf8(&Command::new("rustc").current_dir(&out).arg("nondefault_struct.rs").output().unwrap().stderr).unwrap());
+    let error = String::from_utf8(Command::new("rustc").current_dir(&out).arg("nondefault_struct.rs").output().unwrap().stderr).unwrap();
+    if error != "" {
+        panic!("{}", error);
+    }
 }

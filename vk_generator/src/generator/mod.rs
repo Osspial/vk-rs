@@ -694,7 +694,16 @@ impl<'a> GenTypes<'a> {
                     for f in fields { unsafe {
                         write!(structs, "    pub ").unwrap();
                         match f.field_type {
-                            Var(ident) => writeln!(structs, "{}: {},", &*f.field_name, &*ident),
+                            Var(ident) => {
+                                let wrap_with_option = f.optional & match processed.registry.types().get(&*f.field_type.type_ptr().unwrap()) {
+                                    Some(&VkType::FuncPointer{..}) => true,
+                                    _ => false
+                                };
+                                match wrap_with_option {
+                                    true => writeln!(structs, "{}: Option<{}>,", &*f.field_name, &*ident),
+                                    false => writeln!(structs, "{}: {},", &*f.field_name, &*ident)
+                                }
+                            },
                             ConstPtr(ident, count) => {
                                 write!(structs, "{}: ", &*f.field_name).unwrap();
                                 for _ in 0..count {

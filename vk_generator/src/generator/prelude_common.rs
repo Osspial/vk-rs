@@ -1,3 +1,5 @@
+#![allow(non_upper_case_globals)]
+
 pub use std::os::raw::c_ulonglong;
 pub use self::types::*;
 pub use self::cmds::*;
@@ -28,6 +30,8 @@ macro_rules! handle_nondispatchable {
     }
 }
 
+// Only used if `wrap_bitmasks == true`.
+//TODO: use bitflags crate?
 #[allow(unused_macros)]
 macro_rules! vk_bitflags_wrapped {
     ($name: ident, $all: expr, $flag_type: ty) => {
@@ -43,12 +47,12 @@ macro_rules! vk_bitflags_wrapped {
 
         impl $name {
             #[inline]
-            pub fn empty() -> $name {
+            pub fn empty() -> Self {
                 $name {flags: 0}
             }
 
             #[inline]
-            pub fn all() -> $name {
+            pub fn all() -> Self {
                 $name {flags: $all}
             }
 
@@ -58,7 +62,7 @@ macro_rules! vk_bitflags_wrapped {
             }
 
             #[inline]
-            pub fn from_flags(flags: $flag_type) -> Option<$name> {
+            pub fn from_flags(flags: $flag_type) -> Option<Self> {
                 if flags & !$all == 0 {
                     Some($name {flags: flags})
                 } else {
@@ -67,23 +71,23 @@ macro_rules! vk_bitflags_wrapped {
             }
 
             #[inline]
-            pub fn from_flags_truncate(flags: $flag_type) -> $name {
+            pub fn from_flags_truncate(flags: $flag_type) -> Self {
                 $name {flags: flags & $all}
             }
 
             #[inline]
             pub fn is_empty(self) -> bool {
-                self == $name::empty()
+                self == Self::empty()
             }
 
             #[inline]
             pub fn is_all(self) -> bool {
-                self & $name::all() == $name::all()
+                self & Self::all() == Self::all()
             }
 
             #[inline]
             pub fn intersects(self, other: $name) -> bool {
-                self & other != $name::empty()
+                self & other != Self::empty()
             }
 
             /// Returns true of `other` is a subset of `self`
@@ -97,30 +101,30 @@ macro_rules! vk_bitflags_wrapped {
             type Output = $name;
 
             #[inline]
-            fn bitor(self, rhs: $name) -> $name {
+            fn bitor(self, rhs: $name) -> Self {
                 $name {flags: self.flags | rhs.flags }
             }
         }
 
         impl BitOrAssign for $name {
             #[inline]
-            fn bitor_assign(&mut self, rhs: $name) {
+            fn bitor_assign(&mut self, rhs: Self) {
                 *self = *self | rhs
             }
         }
 
         impl BitAnd for $name {
-            type Output = $name;
+            type Output = Self;
 
             #[inline]
-            fn bitand(self, rhs: $name) -> $name {
+            fn bitand(self, rhs: Self) -> Self {
                 $name {flags: self.flags & rhs.flags}
             }
         }
 
         impl BitAndAssign for $name {
             #[inline]
-            fn bitand_assign(&mut self, rhs: $name) {
+            fn bitand_assign(&mut self, rhs: Self) {
                 *self = *self & rhs
             }
         }
@@ -129,40 +133,40 @@ macro_rules! vk_bitflags_wrapped {
             type Output = $name;
 
             #[inline]
-            fn bitxor(self, rhs: $name) -> $name {
+            fn bitxor(self, rhs: Self) -> Self {
                 $name {flags: self.flags ^ rhs.flags}
             }
         }
 
         impl BitXorAssign for $name {
             #[inline]
-            fn bitxor_assign(&mut self, rhs: $name) {
+            fn bitxor_assign(&mut self, rhs: Self) {
                 *self = *self ^ rhs
             }
         }
 
         impl Sub for $name {
-            type Output = $name;
+            type Output = Self;
 
             #[inline]
-            fn sub(self, rhs: $name) -> $name {
+            fn sub(self, rhs: Self) -> Self {
                 self & !rhs
             }
         }
 
         impl SubAssign for $name {
             #[inline]
-            fn sub_assign(&mut self, rhs: $name) {
+            fn sub_assign(&mut self, rhs: Self) {
                 *self = *self - rhs
             }
         }
 
         impl Not for $name {
-            type Output = $name;
+            type Output = Self;
 
             #[inline]
-            fn not(self) -> $name {
-                self ^ $name::all()
+            fn not(self) -> Self {
+                self ^ Self::all()
             }
         }
     }

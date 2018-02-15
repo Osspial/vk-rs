@@ -7,7 +7,7 @@ use std::process::Command;
 use std::io::Write;
 use std::str;
 
-use vk_generator::{VkVersion, GenConfig};
+use vk_generator::{VkVersion, GenConfig, VariantPaddingConfig};
 
 #[test]
 fn default_global() {
@@ -18,7 +18,7 @@ fn default_global() {
     writeln!(file, "fn main() {{}} mod vk {{").unwrap();
     vk_generator::VkRegistry::new(vk_api::VK_XML)
         .gen_global(&mut file,
-                    VkVersion(1, 0), 
+                    VkVersion(1, 0),
                     &["VK_KHR_surface", "VK_EXT_debug_report"],
                     Default::default());
     writeln!(file, "}}").unwrap();
@@ -35,7 +35,7 @@ fn default_struct() {
     writeln!(file, "fn main() {{}} mod vk {{").unwrap();
     vk_generator::VkRegistry::new(vk_api::VK_XML)
         .gen_struct(&mut file,
-                    VkVersion(1, 0), 
+                    VkVersion(1, 0),
                     &["VK_KHR_surface", "VK_EXT_debug_report"],
                     Default::default());
     writeln!(file, "}}").unwrap();
@@ -53,17 +53,19 @@ fn nondefault_global() {
     writeln!(file, "fn main() {{}} mod vk {{").unwrap();
     vk_generator::VkRegistry::new(vk_api::VK_XML)
         .gen_global(&mut file,
-                    VkVersion(1, 0), 
+                    VkVersion(1, 0),
                     &["VK_KHR_surface", "VK_EXT_debug_report"],
                     GenConfig::new()
                         .remove_type_prefix(true)
                         .remove_vk_result_prefix(false)
                         .remove_command_prefix(false)
-                        .remove_variant_padding(false)
                         .remove_bitmask_prefix(false)
+                        .remove_const_prefix(false)
+                        .variant_padding(VariantPaddingConfig::RemovePrefix)
                         .snake_case_commands(false)
                         .camel_case_variants(false)
                         .snake_case_members(false)
+                        .use_native_enums(false)
                         .wrap_bitmasks(false)
                         .use_libc_types(true));
     writeln!(file, "}}").unwrap();
@@ -81,17 +83,19 @@ fn nondefault_struct() {
     writeln!(file, "fn main() {{}} mod vk {{").unwrap();
     vk_generator::VkRegistry::new(vk_api::VK_XML)
         .gen_struct(&mut file,
-                    VkVersion(1, 0), 
+                    VkVersion(1, 0),
                     &["VK_KHR_surface", "VK_EXT_debug_report"],
                     GenConfig::new()
                         .remove_type_prefix(true)
                         .remove_vk_result_prefix(false)
                         .remove_command_prefix(false)
-                        .remove_variant_padding(false)
                         .remove_bitmask_prefix(false)
+                        .remove_const_prefix(false)
+                        .variant_padding(VariantPaddingConfig::Keep)
                         .snake_case_commands(false)
                         .camel_case_variants(false)
                         .snake_case_members(false)
+                        .use_native_enums(false)
                         .wrap_bitmasks(false)
                         .use_libc_types(true));
     writeln!(file, "}}").unwrap();

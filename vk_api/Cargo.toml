@@ -1,6 +1,6 @@
 [package]
 name = "vk_api"
-version = "1.0.64"
+version = "1.0.69"
 authors = ["Osspial <osspial@gmail.com>"]
 
 description = "The Vulkan API XML exposed as a byte string constant"

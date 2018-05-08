@@ -106,6 +106,11 @@ pub struct GenConfig<'a> {
     ///
     /// Defaults to `true`.
     pub wrap_bitmasks: bool,
+    /// Whether or not to wrap Vulkan's non-dispatchable (i.e. integer) object handles in a wrapper
+    /// struct.
+    ///
+    /// Defaults to `true`.
+    pub wrap_non_dispatchable_handles: bool,
     /// The Vulkan library uses a lot of `C` types, as per it's nature of exposing a `C` ABI. There are
     /// a few ways we can handle using those types: either we can define the typedefs ourself or we can
     /// use the types provided by `libc`. Because `libc` isn't implicitly included in crates we default
@@ -175,6 +180,7 @@ impl<'a> default::Default for GenConfig<'a> {
             use_native_unions: false,
 
             wrap_bitmasks: true,
+            wrap_non_dispatchable_handles: true,
             use_libc_types: false,
             extern_type_overrides: &[]
         }
@@ -940,7 +946,11 @@ impl<'a> GenTypes<'a> {
                     if dispatchable {
                         writeln!(handles, include_str!("handle_dispatchable.rs"), name).unwrap();
                     } else {
-                        writeln!(handles, "handle_nondispatchable!({});", name).unwrap();
+                        if gen_types.config.wrap_non_dispatchable_handles {
+                            writeln!(handles, "handle_nondispatchable!({});", name).unwrap();
+                        } else {
+                            writeln!(handles, "pub type {} = uint64_t;", name).unwrap();
+                        }
                     }
                 }
 

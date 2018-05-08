@@ -12,6 +12,7 @@ pub fn unloaded_function_panic() -> ! {
     panic!("Attempted to run unloaded vulkan function")
 }
 
+#[allow(unused_macros)]
 macro_rules! handle_nondispatchable {
     ($name: ident) => {
         #[repr(C)]

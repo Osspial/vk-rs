@@ -5,7 +5,6 @@ use std::path::Path;
 use std::fs::{File, DirBuilder};
 use std::process::Command;
 use std::io::Write;
-use std::str;
 
 use vk_generator::{VkVersion, GenConfig, VariantPaddingConfig};
 
@@ -78,6 +77,7 @@ fn nondefault_global() {
                 snake_case_members: false,
                 use_native_enums: false,
                 wrap_bitmasks: false,
+                wrap_non_dispatchable_handles: false,
                 use_libc_types: true,
                 ..GenConfig::default()
             },
@@ -115,6 +115,7 @@ fn nondefault_struct() {
                 snake_case_members: false,
                 use_native_enums: false,
                 wrap_bitmasks: false,
+                wrap_non_dispatchable_handles: false,
                 use_libc_types: true,
                 ..GenConfig::default()
             }

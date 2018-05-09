@@ -1,6 +1,6 @@
 /// Temporary Hard-Coded union hack; will be automatically generated when actual unions become stable
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct {0} {{
     data: [u8; 16]
 }}

@@ -685,7 +685,9 @@ impl<'a> GenTypes<'a> {
                     let structs = &mut gen_types.structs;
 
                     if !processed.custom_impls.contains(name) {
-                        writeln!(structs, "#[derive(Debug, Clone)]").unwrap();
+                        writeln!(structs, "#[derive(Debug, Clone, Copy)]").unwrap();
+                    } else {
+                        writeln!(structs, "#[derive(Copy)]").unwrap();
                     }
                     writeln!(structs, "#[repr(C)]\npub struct {} {{", name).unwrap();
                     let type_wrappable_by_option = |type_ident: &str| {
@@ -801,6 +803,7 @@ impl<'a> GenTypes<'a> {
                     if processed.config.use_native_unions {
                         // Create base union type
                         writeln!(unions, "#[repr(C)]").unwrap();
+                        writeln!(unions, "#[derive(Debug, Clone, Copy)]").unwrap();
                         writeln!(unions, "pub union {} {{", &*name).unwrap();
 
                         for v in variants {

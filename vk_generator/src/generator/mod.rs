@@ -803,7 +803,7 @@ impl<'a> GenTypes<'a> {
                     if processed.config.use_native_unions {
                         // Create base union type
                         writeln!(unions, "#[repr(C)]").unwrap();
-                        writeln!(unions, "#[derive(Debug, Clone, Copy)]").unwrap();
+                        writeln!(unions, "#[derive(Clone, Copy)]").unwrap();
                         writeln!(unions, "pub union {} {{", &*name).unwrap();
 
                         for v in variants {
@@ -834,10 +834,6 @@ impl<'a> GenTypes<'a> {
                             }.unwrap();
                         }
                         writeln!(unions, "}}\n").unwrap();
-
-                        // Unions derives don't work at the time of this writing, so we have to manually implement
-                        // it manually. Luckily, the manual implementation is trivial.
-                        writeln!(unions, include_str!("./union_cloned.rs"), &*name).unwrap();
 
                         // Write `Debug` implementation
                         writeln!(unions, include_str!("./custom_impl_debug.rs"), &*name).unwrap();

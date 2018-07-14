@@ -210,7 +210,7 @@ pub struct GenPreproc<'a, 'b> {
 }
 
 impl<'a, 'b> GenPreproc<'a, 'b> {
-    fn new(registry: &'a VkRegistry<'a>, version: VkVersion, extensions: &[&str], config: GenConfig<'b>) -> Self {
+    pub fn new(registry: &'a VkRegistry<'a>, version: VkVersion, extensions: &[&str], config: GenConfig<'b>) -> Self {
         let mut gen = GenPreproc {
             string_buffer: String::with_capacity(registry.buffer_cap()),
             types: HashMap::with_capacity(registry.types().len()),
